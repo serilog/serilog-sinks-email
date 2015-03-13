@@ -40,6 +40,12 @@
     <AssemblyOriginatorKeyFile>..\..\assets\Serilog.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Serilog">
+      <HintPath>..\..\packages\Serilog.1.4.204\lib\net45\Serilog.dll</HintPath>
+    </Reference>
+    <Reference Include="Serilog.FullNetFx">
+      <HintPath>..\..\packages\Serilog.1.4.204\lib\net45\Serilog.FullNetFx.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
@@ -54,19 +60,10 @@
     <Compile Include="Sinks\Email\EmailSink.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Serilog.FullNetFx\Serilog.FullNetFx.csproj">
-      <Project>{7a9e1095-167d-402a-b43d-b36b97ff183d}</Project>
-      <Name>Serilog.FullNetFx</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Serilog\Serilog.csproj">
-      <Project>{0915dbd9-0f7c-4439-8d9e-74c3d579b219}</Project>
-      <Name>Serilog</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="..\..\assets\Serilog.snk">
       <Link>Serilog.snk</Link>
     </None>
+    <None Include="packages.config" />
     <None Include="Serilog.Sinks.Email.nuspec" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

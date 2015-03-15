@@ -3,7 +3,7 @@ param(
     [String] $patch = "0",         # $env:APPVEYOR_BUILD_VERSION
     [String] $customLogger = "",   # C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll
     [Switch] $notouch,
-    [String] $sln                  # e.g serilog-sink-name.sln
+    [String] $sln                  # e.g serilog-sink-name
 )
 
 function Set-AssemblyVersions($informational, $assembly)
@@ -52,8 +52,9 @@ function Invoke-NuGetPack($version)
 function Invoke-Build($majorMinor, $patch, $customLogger, $notouch, $sln)
 {
     $package="$majorMinor.$patch"
+    $slnfile = "$sln.sln"
 
-    Write-Output "Building Serilog.Sinks.Loggly $package"
+    Write-Output "$sln $package"
 
     if (-not $notouch)
     {
@@ -63,12 +64,22 @@ function Invoke-Build($majorMinor, $patch, $customLogger, $notouch, $sln)
         Set-AssemblyVersions $package $assembly
     }
 
-    Install-NuGetPackages $sln
+    Install-NuGetPackages $slnfile
     
-    Invoke-MSBuild $sln $customLogger
+    Invoke-MSBuild $slnfile $customLogger
 
     Invoke-NuGetPack $package
 }
 
 $ErrorActionPreference = "Stop"
+
+if (-not $sln)
+{
+    $slnfull = ls *.sln |
+        Where-Object { -not ($_.Name -like "*net40*") } |
+        Select -first 1
+
+    $sln = $slnfull.BaseName
+}
+
 Invoke-Build $majorMinor $patch $customLogger $notouch $sln

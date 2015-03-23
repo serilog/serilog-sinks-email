@@ -14,6 +14,7 @@
 
 using System.ComponentModel;
 using System.Net;
+using System.Net.Mail;
 
 namespace Serilog.Sinks.Email
 {
@@ -78,5 +79,22 @@ namespace Serilog.Sinks.Email
         /// The SMTP email server to use.
         /// </summary>
         public string MailServer { get; set; }
+
+        internal SmtpClient ToSmtpClient()
+        {
+            var smtpClient = new SmtpClient();
+            if (!string.IsNullOrWhiteSpace(MailServer))
+            {
+                if (NetworkCredentials == null)
+                    smtpClient.UseDefaultCredentials = true;
+                else
+                    smtpClient.Credentials = NetworkCredentials;
+
+                smtpClient.Port = Port;
+                smtpClient.EnableSsl = EnableSsl;
+            }
+
+            return smtpClient;
+        }
     }
 }

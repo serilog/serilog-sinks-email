@@ -58,13 +58,13 @@ namespace Serilog.Sinks.Email
 
             _connectionInfo = connectionInfo;
             _textFormatter = textFormatter;
-
-            _smtpClient = new SmtpClient(connectionInfo.MailServer)
-            {
-                Credentials = _connectionInfo.NetworkCredentials,
-                Port = _connectionInfo.Port,
-                EnableSsl = _connectionInfo.EnableSsl
-            };
+            _smtpClient = _connectionInfo.ToSmtpClient();
+            //_smtpClient = new SmtpClient(connectionInfo.MailServer)
+            //{
+            //    Credentials = _connectionInfo.NetworkCredentials,
+            //    Port = _connectionInfo.Port,
+            //    EnableSsl = _connectionInfo.EnableSsl
+            //};
             _smtpClient.SendCompleted += SendCompletedCallback;
         }
 

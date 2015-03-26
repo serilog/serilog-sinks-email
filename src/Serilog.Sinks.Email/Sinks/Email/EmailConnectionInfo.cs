@@ -14,6 +14,7 @@
 
 using System.ComponentModel;
 using System.Net;
+using System.Net.Mail;
 
 namespace Serilog.Sinks.Email
 {
@@ -78,5 +79,6 @@ namespace Serilog.Sinks.Email
         /// The SMTP email server to use.
         /// </summary>
         public string MailServer { get; set; }
+
     }
 }

@@ -60,7 +60,6 @@ namespace Serilog
             if (loggerConfiguration == null) throw new ArgumentNullException("loggerConfiguration");
             if (fromEmail == null) throw new ArgumentNullException("fromEmail");
             if (toEmail == null) throw new ArgumentNullException("toEmail");
-            //if (mailServer == null) throw new ArgumentNullException("mailServer");
             
             var connectionInfo = new EmailConnectionInfo
             {
@@ -104,7 +103,6 @@ namespace Serilog
             if (loggerConfiguration == null) throw new ArgumentNullException("loggerConfiguration");
             if (fromEmail == null) throw new ArgumentNullException("fromEmail");
             if (toEmails == null) throw new ArgumentNullException("toEmails");
-            //if (mailServer == null) throw new ArgumentNullException("mailServer");
             
             var connectionInfo = new EmailConnectionInfo
             {

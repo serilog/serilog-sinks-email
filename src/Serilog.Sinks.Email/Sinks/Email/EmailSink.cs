@@ -58,13 +58,7 @@ namespace Serilog.Sinks.Email
 
             _connectionInfo = connectionInfo;
             _textFormatter = textFormatter;
-            _smtpClient = _connectionInfo.ToSmtpClient();
-            //_smtpClient = new SmtpClient(connectionInfo.MailServer)
-            //{
-            //    Credentials = _connectionInfo.NetworkCredentials,
-            //    Port = _connectionInfo.Port,
-            //    EnableSsl = _connectionInfo.EnableSsl
-            //};
+            _smtpClient = CreateSmtpClient();
             _smtpClient.SendCompleted += SendCompletedCallback;
         }
 
@@ -133,5 +127,23 @@ namespace Serilog.Sinks.Email
 
             await _smtpClient.SendMailAsync(mailMessage);
         }
+
+        private SmtpClient CreateSmtpClient()
+        {
+            var smtpClient = new SmtpClient();
+            if (!string.IsNullOrWhiteSpace(_connectionInfo.MailServer))
+            {
+                if (_connectionInfo.NetworkCredentials == null)
+                    smtpClient.UseDefaultCredentials = true;
+                else
+                    smtpClient.Credentials = _connectionInfo.NetworkCredentials;
+
+                smtpClient.Port = _connectionInfo.Port;
+                smtpClient.EnableSsl = _connectionInfo.EnableSsl;
+            }
+
+            return smtpClient;
+        }
+
     }
 }

@@ -137,7 +137,8 @@ namespace Serilog.Sinks.Email
                     smtpClient.UseDefaultCredentials = true;
                 else
                     smtpClient.Credentials = _connectionInfo.NetworkCredentials;
-
+                
+                smtpClient.Host = _connectionInfo.MailServer;
                 smtpClient.Port = _connectionInfo.Port;
                 smtpClient.EnableSsl = _connectionInfo.EnableSsl;
             }

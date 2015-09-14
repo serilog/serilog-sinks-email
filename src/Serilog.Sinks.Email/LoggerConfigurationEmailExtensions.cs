@@ -205,6 +205,7 @@ namespace Serilog
             TimeSpan? period = null)
         {
             if (connectionInfo == null) throw new ArgumentNullException("connectionInfo");
+            if (textFormatter == null) throw new ArgumentNullException("textFormatter");
 
             var defaultedPeriod = period ?? EmailSink.DefaultPeriod;
 

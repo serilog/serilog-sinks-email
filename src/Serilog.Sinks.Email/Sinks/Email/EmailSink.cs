@@ -25,7 +25,7 @@ using Serilog.Sinks.PeriodicBatching;
 
 namespace Serilog.Sinks.Email
 {
-    public class EmailSink : PeriodicBatchingSink
+    class EmailSink : PeriodicBatchingSink
     {
         readonly EmailConnectionInfo _connectionInfo;
 

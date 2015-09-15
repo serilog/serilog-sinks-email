@@ -1,4 +1,4 @@
-﻿// Copyright 2014 Serilog Contributors
+// Copyright 2014 Serilog Contributors
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -117,7 +117,8 @@ namespace Serilog.Sinks.Email
                 Subject = _connectionInfo.EmailSubject,
                 Body = payload.ToString(),
                 BodyEncoding = Encoding.UTF8,
-                SubjectEncoding = Encoding.UTF8
+                SubjectEncoding = Encoding.UTF8,
+                IsBodyHtml = _connectionInfo.IsBodyHtml
             };
 
             foreach (var recipient in _connectionInfo.ToEmail.Split(",;".ToCharArray(), StringSplitOptions.RemoveEmptyEntries))

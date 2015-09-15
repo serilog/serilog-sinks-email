@@ -1,4 +1,4 @@
-﻿// Copyright 2014 Serilog Contributors
+// Copyright 2014 Serilog Contributors
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ using Serilog.Configuration;
 using Serilog.Events;
 using Serilog.Formatting.Display;
 using Serilog.Sinks.Email;
+using Serilog.Formatting;
 
 namespace Serilog
 {
@@ -181,6 +182,35 @@ namespace Serilog
 
             return loggerConfiguration.Sink(
                 new EmailSink(connectionInfo, batchPostingLimit, defaultedPeriod, formatter),
+                restrictedToMinimumLevel);
+        }
+
+        /// <summary>
+        /// Adds a sink that sends log events via email.
+        /// </summary>
+        /// <param name="loggerConfiguration">The logger configuration.</param>
+        /// <param name="connectionInfo">The connection info used for </param>
+        /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
+        /// <param name="batchPostingLimit">The maximum number of events to post in a single batch.</param>
+        /// <param name="period">The time to wait between checking for event batches.</param>
+        /// <param name="textFormatter">ITextFormatter implementation to write log entry to email.</param>
+        /// <returns>Logger configuration, allowing configuration to continue.</returns>
+        /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
+        public static LoggerConfiguration Email(
+            this LoggerSinkConfiguration loggerConfiguration,
+            EmailConnectionInfo connectionInfo,
+            ITextFormatter textFormatter,
+            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+            int batchPostingLimit = EmailSink.DefaultBatchPostingLimit,
+            TimeSpan? period = null)
+        {
+            if (connectionInfo == null) throw new ArgumentNullException("connectionInfo");
+            if (textFormatter == null) throw new ArgumentNullException("textFormatter");
+
+            var defaultedPeriod = period ?? EmailSink.DefaultPeriod;
+
+            return loggerConfiguration.Sink(
+                new EmailSink(connectionInfo, batchPostingLimit, defaultedPeriod, textFormatter),
                 restrictedToMinimumLevel);
         }
     }

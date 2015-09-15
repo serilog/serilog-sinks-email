@@ -1,4 +1,4 @@
-﻿// Copyright 2014 Serilog Contributors
+// Copyright 2014 Serilog Contributors
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ namespace Serilog.Sinks.Email
         {
             Port = DefaultPort;
             EmailSubject = DefaultSubject;
+            IsBodyHtml = false;
         }
 
         /// <summary>
@@ -78,5 +79,10 @@ namespace Serilog.Sinks.Email
         /// The SMTP email server to use.
         /// </summary>
         public string MailServer { get; set; }
+
+        /// <summary>
+        /// Sets whether the body contents of the email is HTML. Defaults to false.
+        /// </summary>
+        public bool IsBodyHtml { get; set; }
     }
 }

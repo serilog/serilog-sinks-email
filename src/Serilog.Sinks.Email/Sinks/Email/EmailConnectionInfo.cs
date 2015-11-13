@@ -30,7 +30,7 @@ namespace Serilog.Sinks.Email
         /// <summary>
         /// The default subject used for email messages.
         /// </summary>
-        const string DefaultSubject = "Log Email";
+        public const string DefaultSubject = "Log Email";
 
         /// <summary>
         /// Constructs the <see cref="EmailConnectionInfo"/> with the default port and default email subject set.

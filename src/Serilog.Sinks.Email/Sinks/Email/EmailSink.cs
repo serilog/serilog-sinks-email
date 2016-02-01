@@ -33,6 +33,8 @@ namespace Serilog.Sinks.Email
 
         readonly ITextFormatter _textFormatter;
 
+        private readonly Queue<DateTime> _lastMailSentTimes;
+
         /// <summary>
         /// A reasonable default for the number of events posted in
         /// each batch.
@@ -60,6 +62,11 @@ namespace Serilog.Sinks.Email
             _textFormatter = textFormatter;
             _smtpClient = CreateSmtpClient();
             _smtpClient.SendCompleted += SendCompletedCallback;
+
+            if (_connectionInfo.MaxNumberOfSentMailsPerHour.HasValue)
+            {
+                _lastMailSentTimes = new Queue<DateTime>(_connectionInfo.MaxNumberOfSentMailsPerHour.Value);
+            }
         }
 
         /// <summary>
@@ -95,31 +102,11 @@ namespace Serilog.Sinks.Email
 
         protected override void EmitBatch(IEnumerable<LogEvent> events)
         {
-            if (events == null)
-                throw new ArgumentNullException("events");
-            var payload = new StringWriter();
-
-            foreach (var logEvent in events)
+            if (RateLimitingAllowsSending())
             {
-                _textFormatter.Format(logEvent, payload);
+                var mailMessage = BuildMailMessageFromEvents(events);
+                _smtpClient.Send(mailMessage);
             }
-
-            var mailMessage = new MailMessage
-            {
-                From = new MailAddress(_connectionInfo.FromEmail),
-                Subject = _connectionInfo.EmailSubject,
-                Body = payload.ToString(),
-                BodyEncoding = Encoding.UTF8,
-                SubjectEncoding = Encoding.UTF8,
-                IsBodyHtml = _connectionInfo.IsBodyHtml
-            };
-
-            foreach (var recipient in _connectionInfo.ToEmail.Split(",;".ToCharArray(), StringSplitOptions.RemoveEmptyEntries))
-            {
-                mailMessage.To.Add(recipient);
-            }
-
-            _smtpClient.Send(mailMessage);
         }
 
 #if NET45
@@ -131,7 +118,47 @@ namespace Serilog.Sinks.Email
         /// not both.</remarks>
         protected override async Task EmitBatchAsync(IEnumerable<LogEvent> events)
         {
+            if (RateLimitingAllowsSending())
+            {
+                var mailMessage = BuildMailMessageFromEvents(events);
+                await _smtpClient.SendMailAsync(mailMessage);
+            }
+        }
+#endif
 
+
+
+        /// <summary>
+        /// This method tracks the last datetimes of sent log emails and returns false, if the configured maximum is reached
+        /// </summary>
+        /// <returns>true, if rate limiting is disabled or if the maximum rate is not reached. 
+        /// false if the maximum rate is reached.</returns>
+        private bool RateLimitingAllowsSending()
+        {
+            if (!_connectionInfo.MaxNumberOfSentMailsPerHour.HasValue) return true;
+
+            var maxNumberOfSentMails = _connectionInfo.MaxNumberOfSentMailsPerHour.Value;
+
+            //remove old entries from queue
+            while (_lastMailSentTimes.Count > 0 && _lastMailSentTimes.Peek() < DateTime.UtcNow - TimeSpan.FromHours(1))
+            {
+                _lastMailSentTimes.Dequeue();
+            }
+
+            //test
+            if (_lastMailSentTimes.Count >= maxNumberOfSentMails)
+            {
+                //rate limiting in action
+                SelfLog.WriteLine("EmailSink is actively rate limiting.");
+                return false;
+            }
+
+            _lastMailSentTimes.Enqueue(DateTime.UtcNow);
+            return true;
+        }
+
+        private MailMessage BuildMailMessageFromEvents(IEnumerable<LogEvent> events)
+        {
             if (events == null)
                 throw new ArgumentNullException("events");
             var payload = new StringWriter();
@@ -155,11 +182,8 @@ namespace Serilog.Sinks.Email
             {
                 mailMessage.To.Add(recipient);
             }
-
-            await _smtpClient.SendMailAsync(mailMessage);
+            return mailMessage;
         }
-#endif
-
         private SmtpClient CreateSmtpClient()
         {
             var smtpClient = new SmtpClient();

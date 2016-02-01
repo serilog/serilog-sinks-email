@@ -84,5 +84,12 @@ namespace Serilog.Sinks.Email
         /// Sets whether the body contents of the email is HTML. Defaults to false.
         /// </summary>
         public bool IsBodyHtml { get; set; }
+
+        /// <summary>
+        /// Limits the maximum number of emails per hour (60 minute moving time window).
+        /// 
+        /// Null (Default) will disable rate limiting.
+        /// </summary>
+        public int? MaxNumberOfSentMailsPerHour { get; set; }
     }
 }

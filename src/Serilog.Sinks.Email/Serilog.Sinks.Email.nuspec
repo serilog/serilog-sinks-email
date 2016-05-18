@@ -11,12 +11,13 @@
     <iconUrl>http://serilog.net/images/serilog-sink-nuget.png</iconUrl>
     <tags>serilog logging email smtp</tags>
     <dependencies>
-      <dependency id="Serilog" version="[1.5.11,2)" />
+      <dependency id="Serilog" version="[2.0.0-rc-556, )" />
+      <dependency id="Serilog.Sinks.PeriodicBatching" version="[2.0.0-rc-707, )" />
     </dependencies>
   </metadata>
   <files>
-    <file src="bin\v4.0\$configuration$\$id$.dll" target="lib\net40\" />
-    <file src="bin\v4.0\$configuration$\$id$.xml" target="lib\net40\" />
-    <file src="bin\v4.0\$configuration$\$id$.pdb" target="lib\net40\" />
+    <file src="bin\v4.5\$configuration$\$id$.dll" target="lib\net45\" />
+    <file src="bin\v4.5\$configuration$\$id$.xml" target="lib\net45\" />
+    <file src="bin\v4.5\$configuration$\$id$.pdb" target="lib\net45\" />
   </files>
 </package>

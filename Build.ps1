@@ -45,7 +45,7 @@ function Invoke-NuGetPackSpec($nuspec, $version)
 function Invoke-NuGetPack($version)
 {
     ls src/**/*.csproj |
-        Where-Object { -not ($_.Name -like "*net40*") } |
+        Where-Object { -not ($_.Name -like "*net45*") } |
         ForEach-Object { Invoke-NuGetPackProj $_ }
 }
 
@@ -76,10 +76,12 @@ $ErrorActionPreference = "Stop"
 if (-not $sln)
 {
     $slnfull = ls *.sln |
-        Where-Object { -not ($_.Name -like "*net40*") } |
+        Where-Object { -not ($_.Name -like "*net45*") } |
         Select -first 1
 
     $sln = $slnfull.BaseName
 }
+
+#$env:Path = ";C:\Program Files (x86)\MSBuild\14.0\Bin\;" + $env:Path
 
 Invoke-Build $majorMinor $patch $customLogger $notouch $sln

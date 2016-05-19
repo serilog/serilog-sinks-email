@@ -1,5 +1,7 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 
-[assembly: AssemblyTitle("Serilog.Sinks.Email")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyCopyright("Copyright © Serilog Contributors 2014")]
+[assembly: AssemblyVersion("2.0.0.0")]
+
+[assembly: CLSCompliant(true)]

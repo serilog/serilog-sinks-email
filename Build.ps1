@@ -1,85 +1,24 @@
-param(
-    [String] $majorMinor = "0.0",  # 2.0
-    [String] $patch = "0",         # $env:APPVEYOR_BUILD_VERSION
-    [String] $customLogger = "",   # C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll
-    [Switch] $notouch,
-    [String] $sln                  # e.g serilog-sink-name
-)
+# fixes error: "System.DllNotFoundException: Unable to load DLL 'Microsoft.DiaSymReader.Native.x86.dll': The specified module could not be found. (Exception from HRESULT: 0x8007007E)"
+$env:Path = ";C:\Program Files\dotnet\sdk\1.0.0-preview1-002702\runtimes\win-x86\native;" + $env:Path
 
-function Set-AssemblyVersions($informational, $assembly)
-{
-    (Get-Content assets/CommonAssemblyInfo.cs) |
-        ForEach-Object { $_ -replace """1.0.0.0""", """$assembly""" } |
-        ForEach-Object { $_ -replace """1.0.0""", """$informational""" } |
-        ForEach-Object { $_ -replace """1.1.1.1""", """$($informational).0""" } |
-        Set-Content assets/CommonAssemblyInfo.cs
-}
+Push-Location $PSScriptRoot
 
-function Install-NuGetPackages($solution)
-{
-    nuget restore $solution
-}
+if(Test-Path .\artifacts) { Remove-Item .\artifacts -Force -Recurse }
 
-function Invoke-MSBuild($solution, $customLogger)
-{
-    if ($customLogger)
-    {
-        msbuild "$solution" /verbosity:minimal /p:Configuration=Release /logger:"$customLogger"
-    }
-    else
-    {
-        msbuild "$solution" /verbosity:minimal /p:Configuration=Release
-    }
-}
+& dotnet restore
 
-function Invoke-NuGetPackProj($csproj)
-{
-    nuget pack -Prop Configuration=Release -Symbols $csproj
-}
+$revision = @{ $true = $env:APPVEYOR_BUILD_NUMBER; $false = 1 }[$env:APPVEYOR_BUILD_NUMBER -ne $NULL];
 
-function Invoke-NuGetPackSpec($nuspec, $version)
-{
-    nuget pack $nuspec -Version $version -OutputDirectory ..\..\
-}
+Push-Location src/Serilog.Sinks.Email
 
-function Invoke-NuGetPack($version)
-{
-    ls src/**/*.csproj |
-        Where-Object { -not ($_.Name -like "*net40*") } |
-        ForEach-Object { Invoke-NuGetPackProj $_ }
-}
+& dotnet pack -c Release -o ..\..\.\artifacts --version-suffix=$revision
+if($LASTEXITCODE -ne 0) { exit 1 }    
 
-function Invoke-Build($majorMinor, $patch, $customLogger, $notouch, $sln)
-{
-    $package="$majorMinor.$patch"
-    $slnfile = "$sln.sln"
+#Pop-Location
+#Push-Location test/Serilog.Sinks.Email.Tests
 
-    Write-Output "$sln $package"
+#& dotnet test -c Release
+#if($LASTEXITCODE -ne 0) { exit 2 }
 
-    if (-not $notouch)
-    {
-        $assembly = "$majorMinor.0.0"
-
-        Write-Output "Assembly version will be set to $assembly"
-        Set-AssemblyVersions $package $assembly
-    }
-
-    Install-NuGetPackages $slnfile
-    
-    Invoke-MSBuild $slnfile $customLogger
-
-    Invoke-NuGetPack $package
-}
-
-$ErrorActionPreference = "Stop"
-
-if (-not $sln)
-{
-    $slnfull = ls *.sln |
-        Where-Object { -not ($_.Name -like "*net40*") } |
-        Select -first 1
-
-    $sln = $slnfull.BaseName
-}
-
-Invoke-Build $majorMinor $patch $customLogger $notouch $sln
+Pop-Location
+Pop-Location

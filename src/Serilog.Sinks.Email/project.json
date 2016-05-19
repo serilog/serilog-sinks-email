@@ -1,0 +1,22 @@
+{
+  "version": "2.0.0-rc-*",
+  "description": "The email sink for Serilog",
+  "authors": [ "Serilog Contributors" ],
+  "packOptions": {
+    "tags": [ "serilog", "email", "io" ],
+    "projectUrl": "http://serilog.net",
+    "licenseUrl": "http://www.apache.org/licenses/LICENSE-2.0",
+    "iconUrl": "http://serilog.net/images/serilog-sink-nuget.png"
+  },
+  "dependencies": {
+    "Serilog": "2.0.0-rc-556",
+    "Serilog.Sinks.PeriodicBatching": "2.0.0-rc-707"
+  },
+  "buildOptions": {
+    "keyFile": "../../assets/Serilog.snk",
+    "xmlDoc": true
+  },
+  "frameworks": {
+    "net4.5": {}
+   }
+}

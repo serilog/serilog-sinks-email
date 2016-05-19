@@ -1,3 +1,7 @@
+2.0.0 
+ * Moved to new project
+ * DotNet Core support
+
 1.5
  * Moved from serilog/serilog
 

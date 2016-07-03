@@ -11,18 +11,20 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#if SYSTEM_NET
+
+#if MAIL_KIT
 
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.Mail;
+using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.PeriodicBatching;
+using MailKit.Net.Smtp;
+using System.Threading.Tasks;
 
 namespace Serilog.Sinks.Email
 {
@@ -30,7 +32,8 @@ namespace Serilog.Sinks.Email
     {
         readonly EmailConnectionInfo _connectionInfo;
 
-        readonly SmtpClient _smtpClient;
+        readonly MimeKit.InternetAddress _fromAddress;
+        readonly IEnumerable<MimeKit.InternetAddress> _toAddresses;
 
         readonly ITextFormatter _textFormatter;
 
@@ -58,46 +61,33 @@ namespace Serilog.Sinks.Email
             if (connectionInfo == null) throw new ArgumentNullException(nameof(connectionInfo));
 
             _connectionInfo = connectionInfo;
+            _fromAddress = MimeKit.MailboxAddress.Parse(_connectionInfo.FromEmail);
+            _toAddresses = connectionInfo
+                .ToEmail
+                .Split(",;".ToCharArray(), StringSplitOptions.RemoveEmptyEntries)
+                .Select(MimeKit.MailboxAddress.Parse)
+                .ToArray();
+
             _textFormatter = textFormatter;
-            _smtpClient = CreateSmtpClient();
-            _smtpClient.SendCompleted += SendCompletedCallback;
         }
-
-        /// <summary>
-        /// Reports if there is an error in sending an email
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        static void SendCompletedCallback(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
+        
+        private MimeKit.MimeMessage CreateMailMessage(string payload)
         {
-            if (e.Cancelled)
-            {
-                SelfLog.WriteLine("Received failed result {0}: {1}", "Cancelled", e.Error);
-            }
-            if (e.Error != null)
-            {
-                SelfLog.WriteLine("Received failed result {0}: {1}", "Error", e.Error);
-            }
-        }
-
-        /// <summary>
-        /// Free resources held by the sink.
-        /// </summary>
-        /// <param name="disposing">If true, called because the object is being disposed; if false,
-        /// the object is being disposed from the finalizer.</param>
-        protected override void Dispose(bool disposing)
-        {
-            // First flush the buffer
-            base.Dispose(disposing);
-
-            if (disposing)
-                _smtpClient.Dispose();
+            var mailMessage = new MimeKit.MimeMessage();
+            mailMessage.From.Add(_fromAddress);
+            mailMessage.To.AddRange(_toAddresses);
+            mailMessage.Subject = _connectionInfo.EmailSubject;
+            mailMessage.Body = _connectionInfo.IsBodyHtml
+                ? new MimeKit.BodyBuilder { HtmlBody = payload }.ToMessageBody()
+                : new MimeKit.BodyBuilder { TextBody = payload }.ToMessageBody();
+            return mailMessage;            
         }
 
         protected override void EmitBatch(IEnumerable<LogEvent> events)
         {
             if (events == null)
                 throw new ArgumentNullException(nameof(events));
+
             var payload = new StringWriter();
 
             foreach (var logEvent in events)
@@ -105,25 +95,22 @@ namespace Serilog.Sinks.Email
                 _textFormatter.Format(logEvent, payload);
             }
 
-            var mailMessage = new MailMessage
-            {
-                From = new MailAddress(_connectionInfo.FromEmail),
-                Subject = _connectionInfo.EmailSubject,
-                Body = payload.ToString(),
-                BodyEncoding = Encoding.UTF8,
-                SubjectEncoding = Encoding.UTF8,
-                IsBodyHtml = _connectionInfo.IsBodyHtml
-            };
+            var mailMessage = CreateMailMessage(payload.ToString());
 
-            foreach (var recipient in _connectionInfo.ToEmail.Split(",;".ToCharArray(), StringSplitOptions.RemoveEmptyEntries))
+            try
             {
-                mailMessage.To.Add(recipient);
+                using (var smtpClient = OpenConnectedSmtpClient())
+                {
+                    smtpClient.Send(mailMessage);
+                    smtpClient.Disconnect(quit: false);
+                }
             }
-
-            _smtpClient.Send(mailMessage);
+            catch(Exception ex)
+            {
+                SelfLog.WriteLine("Failed to send email: {0}", ex.ToString());
+            }
         }
 
-#if NET45
         /// <summary>
         /// Emit a batch of log events, running asynchronously.
         /// </summary>
@@ -132,9 +119,9 @@ namespace Serilog.Sinks.Email
         /// not both.</remarks>
         protected override async Task EmitBatchAsync(IEnumerable<LogEvent> events)
         {
-
             if (events == null)
                 throw new ArgumentNullException(nameof(events));
+
             var payload = new StringWriter();
 
             foreach (var logEvent in events)
@@ -142,40 +129,39 @@ namespace Serilog.Sinks.Email
                 _textFormatter.Format(logEvent, payload);
             }
 
-            var mailMessage = new MailMessage
-            {
-                From = new MailAddress(_connectionInfo.FromEmail),
-                Subject = _connectionInfo.EmailSubject,
-                Body = payload.ToString(),
-                BodyEncoding = Encoding.UTF8,
-                SubjectEncoding = Encoding.UTF8,
-                IsBodyHtml = _connectionInfo.IsBodyHtml
-            };
+            var mailMessage = CreateMailMessage(payload.ToString());
 
-            foreach (var recipient in _connectionInfo.ToEmail.Split(",;".ToCharArray(), StringSplitOptions.RemoveEmptyEntries))
+            try
             {
-                mailMessage.To.Add(recipient);
+                using (var smtpClient = OpenConnectedSmtpClient())
+                {
+                    await smtpClient.SendAsync(mailMessage);
+                    await smtpClient.DisconnectAsync(quit: true);
+                }
             }
-
-            await _smtpClient.SendMailAsync(mailMessage);
+            catch (Exception ex)
+            {
+                SelfLog.WriteLine("Failed to send email: {0}", ex.ToString());
+            }
         }
-#endif
 
-        private SmtpClient CreateSmtpClient()
+        private SmtpClient OpenConnectedSmtpClient()
         {
             var smtpClient = new SmtpClient();
             if (!string.IsNullOrWhiteSpace(_connectionInfo.MailServer))
             {
-                if (_connectionInfo.NetworkCredentials == null)
-                    smtpClient.UseDefaultCredentials = true;
-                else
-                    smtpClient.Credentials = _connectionInfo.NetworkCredentials;
+                if (_connectionInfo.NetworkCredentials != null)
+                {
+                    smtpClient.Authenticate(
+                        Encoding.UTF8,
+                        _connectionInfo.NetworkCredentials.GetCredential(
+                            _connectionInfo.MailServer, _connectionInfo.Port, "smtp"));
+                }
 
-                smtpClient.Host = _connectionInfo.MailServer;
-                smtpClient.Port = _connectionInfo.Port;
-                smtpClient.EnableSsl = _connectionInfo.EnableSsl;
+                smtpClient.Connect(
+                    _connectionInfo.MailServer, _connectionInfo.Port,
+                    useSsl: _connectionInfo.EnableSsl); 
             }
-
             return smtpClient;
         }
     }

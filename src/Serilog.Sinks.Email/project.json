@@ -1,0 +1,40 @@
+﻿{
+  "version": "2.0.0",
+  "description": "The file sink for Serilog",
+  "authors": [ "Serilog Contributors" ],
+  "packOptions": {
+    "tags": [ "serilog", "file", "io" ],
+    "projectUrl": "http://serilog.net",
+    "licenseUrl": "http://www.apache.org/licenses/LICENSE-2.0",
+    "iconUrl": "http://serilog.net/images/serilog-sink-nuget.png"
+  },
+  "dependencies": {
+    "Serilog": "2.0.0",
+    "Serilog.Sinks.PeriodicBatching": "2.0.0"
+  },
+  "buildOptions": {
+    "keyFile": "../../assets/Serilog.snk",
+    "xmlDoc": true
+  },
+  "frameworks": {
+    "net4.5": {
+        "frameworkAssemblies": {
+            "System.Net": ""
+        },
+        "buildOptions": {
+            "define": [ "SYSTEM_NET" ]
+        }
+    }
+    //,
+    //"netstandard1.3": {
+    //  "dependencies": {
+    //    "MailKit": "1.4.0",
+    //    "System.Linq": "4.1.0",
+    //    "System.Threading": "4.0.11"
+    //  },
+    //  "buildOptions": {
+    //    "define": [ "MAIL_KIT" ]
+    //  }
+    //}
+  }
+}

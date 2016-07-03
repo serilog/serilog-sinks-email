@@ -54,7 +54,7 @@ namespace Serilog.Sinks.Email
         public EmailSink(EmailConnectionInfo connectionInfo, int batchSizeLimit, TimeSpan period, ITextFormatter textFormatter)
             : base(batchSizeLimit, period)
         {
-            if (connectionInfo == null) throw new ArgumentNullException("connectionInfo");
+            if (connectionInfo == null) throw new ArgumentNullException(nameof(connectionInfo));
 
             _connectionInfo = connectionInfo;
             _textFormatter = textFormatter;
@@ -96,7 +96,7 @@ namespace Serilog.Sinks.Email
         protected override void EmitBatch(IEnumerable<LogEvent> events)
         {
             if (events == null)
-                throw new ArgumentNullException("events");
+                throw new ArgumentNullException(nameof(events));
             var payload = new StringWriter();
 
             foreach (var logEvent in events)
@@ -133,7 +133,7 @@ namespace Serilog.Sinks.Email
         {
 
             if (events == null)
-                throw new ArgumentNullException("events");
+                throw new ArgumentNullException(nameof(events));
             var payload = new StringWriter();
 
             foreach (var logEvent in events)

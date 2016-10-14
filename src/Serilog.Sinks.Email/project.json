@@ -18,23 +18,24 @@
   },
   "frameworks": {
     "net4.5": {
-        "frameworkAssemblies": {
-            "System.Net": ""
-        },
-        "buildOptions": {
-            "define": [ "SYSTEM_NET" ]
-        }
+      "frameworkAssemblies": {
+        "System.Net": ""
+      },
+      "buildOptions": {
+        "define": [ "SYSTEM_NET" ]
+      }
+    },
+    "netstandard1.3": {
+      "dependencies": {
+        "MailKit": "1.4.0",
+        "System.Linq": "4.1.0",
+        "System.Threading": "4.0.11"
+      },
+      "buildOptions": {
+        "define": [
+          "MAIL_KIT"
+        ]
+      }
     }
-    //,
-    //"netstandard1.3": {
-    //  "dependencies": {
-    //    "MailKit": "1.4.0",
-    //    "System.Linq": "4.1.0",
-    //    "System.Threading": "4.0.11"
-    //  },
-    //  "buildOptions": {
-    //    "define": [ "MAIL_KIT" ]
-    //  }
-    //}
   }
 }

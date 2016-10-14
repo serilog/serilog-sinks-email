@@ -16,26 +16,25 @@
             "frameworkAssemblies": {
                 "System.Configuration": ""
             }
+        },
+        "netcoreapp1.0": {
+           "buildOptions": {
+               "keyFile": "../../assets/Serilog.snk",
+               "define": [ "MAIL_KIT" ]
+           },
+           "imports": [
+               "dnxcore50",
+               "portable-net45+win8"
+           ],
+           "dependencies": {
+               "Microsoft.NETCore.App": {
+                   "type": "platform",
+                   "version": "1.0.0"
+               },
+               "MailKit": "1.4.0",
+               "System.Linq": "4.1.0",
+               "System.Threading": "4.0.11"
+           }
         }
-        //,
-        //"netcoreapp1.0": {
-        //    "buildOptions": {
-        //        "keyFile": "../../assets/Serilog.snk",
-        //        "define": [ "MAIL_KIT" ]
-        //    },
-        //    "imports": [
-        //        "dnxcore50",
-        //        "portable-net45+win8"
-        //    ],
-        //    "dependencies": {
-        //        "Microsoft.NETCore.App": {
-        //            "type": "platform",
-        //            "version": "1.0.0"
-        //        },
-        //        "MailKit": "1.4.0",
-        //        "System.Linq": "4.1.0",
-        //        "System.Threading": "4.0.11"
-        //    }
-        //}
     }
 }

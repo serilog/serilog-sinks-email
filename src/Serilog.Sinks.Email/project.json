@@ -27,7 +27,7 @@
     },
     "netstandard1.3": {
       "dependencies": {
-        "MailKit": "1.4.0",
+        "MailKit": "1.4.2",
         "System.Linq": "4.1.0",
         "System.Threading": "4.0.11"
       },

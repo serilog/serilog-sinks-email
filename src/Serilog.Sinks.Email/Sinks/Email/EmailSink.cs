@@ -94,36 +94,6 @@ namespace Serilog.Sinks.Email
                 _smtpClient.Dispose();
         }
 
-        protected override void EmitBatch(IEnumerable<LogEvent> events)
-        {
-            if (events == null)
-                throw new ArgumentNullException(nameof(events));
-            var payload = new StringWriter();
-
-            foreach (var logEvent in events)
-            {
-                _textFormatter.Format(logEvent, payload);
-            }
-
-            var mailMessage = new MailMessage
-            {
-                From = new MailAddress(_connectionInfo.FromEmail),
-                Subject = _connectionInfo.EmailSubject,
-                Body = payload.ToString(),
-                BodyEncoding = Encoding.UTF8,
-                SubjectEncoding = Encoding.UTF8,
-                IsBodyHtml = _connectionInfo.IsBodyHtml
-            };
-
-            foreach (var recipient in _connectionInfo.ToEmail.Split(",;".ToCharArray(), StringSplitOptions.RemoveEmptyEntries))
-            {
-                mailMessage.To.Add(recipient);
-            }
-
-            _smtpClient.Send(mailMessage);
-        }
-
-#if NET45
         /// <summary>
         /// Emit a batch of log events, running asynchronously.
         /// </summary>
@@ -132,9 +102,9 @@ namespace Serilog.Sinks.Email
         /// not both.</remarks>
         protected override async Task EmitBatchAsync(IEnumerable<LogEvent> events)
         {
-
             if (events == null)
                 throw new ArgumentNullException(nameof(events));
+
             var payload = new StringWriter();
 
             foreach (var logEvent in events)
@@ -159,7 +129,6 @@ namespace Serilog.Sinks.Email
 
             await _smtpClient.SendMailAsync(mailMessage);
         }
-#endif
 
         private SmtpClient CreateSmtpClient()
         {

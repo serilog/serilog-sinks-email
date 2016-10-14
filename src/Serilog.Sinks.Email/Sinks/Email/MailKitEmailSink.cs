@@ -83,34 +83,6 @@ namespace Serilog.Sinks.Email
             return mailMessage;            
         }
 
-        protected override void EmitBatch(IEnumerable<LogEvent> events)
-        {
-            if (events == null)
-                throw new ArgumentNullException(nameof(events));
-
-            var payload = new StringWriter();
-
-            foreach (var logEvent in events)
-            {
-                _textFormatter.Format(logEvent, payload);
-            }
-
-            var mailMessage = CreateMailMessage(payload.ToString());
-
-            try
-            {
-                using (var smtpClient = OpenConnectedSmtpClient())
-                {
-                    smtpClient.Send(mailMessage);
-                    smtpClient.Disconnect(quit: false);
-                }
-            }
-            catch(Exception ex)
-            {
-                SelfLog.WriteLine("Failed to send email: {0}", ex.ToString());
-            }
-        }
-
         /// <summary>
         /// Emit a batch of log events, running asynchronously.
         /// </summary>

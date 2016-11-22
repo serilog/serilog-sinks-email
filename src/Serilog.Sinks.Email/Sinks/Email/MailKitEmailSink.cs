@@ -122,6 +122,10 @@ namespace Serilog.Sinks.Email
             var smtpClient = new SmtpClient();
             if (!string.IsNullOrWhiteSpace(_connectionInfo.MailServer))
             {
+                smtpClient.Connect(
+                    _connectionInfo.MailServer, _connectionInfo.Port,
+                    useSsl: _connectionInfo.EnableSsl);
+
                 if (_connectionInfo.NetworkCredentials != null)
                 {
                     smtpClient.Authenticate(
@@ -129,10 +133,6 @@ namespace Serilog.Sinks.Email
                         _connectionInfo.NetworkCredentials.GetCredential(
                             _connectionInfo.MailServer, _connectionInfo.Port, "smtp"));
                 }
-
-                smtpClient.Connect(
-                    _connectionInfo.MailServer, _connectionInfo.Port,
-                    useSsl: _connectionInfo.EnableSsl); 
             }
             return smtpClient;
         }

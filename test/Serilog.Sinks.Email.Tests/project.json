@@ -1,40 +1,43 @@
 {
-    "version": "2.0.0",
-    "testRunner": "xunit",
-    "dependencies": {
-        "Serilog": "2.0.0",
-        "xunit": "2.2.0-*",
-        "dotnet-test-xunit": "2.2.0-preview2-build1029",
-        "Serilog.Sinks.Email": { "target": "project" }
-    },
-    "frameworks": {
-        "net4.5.2": {
-            "buildOptions": {
-                "keyFile": "../../assets/Serilog.snk",
-                "define": [ "SYSTEM_NET" ]
-            },
-            "frameworkAssemblies": {
-                "System.Configuration": ""
-            }
-        },
-        "netcoreapp1.0": {
-           "buildOptions": {
-               "keyFile": "../../assets/Serilog.snk",
-               "define": [ "MAIL_KIT" ]
-           },
-           "imports": [
-               "dnxcore50",
-               "portable-net45+win8"
-           ],
-           "dependencies": {
-               "Microsoft.NETCore.App": {
-                   "type": "platform",
-                   "version": "1.0.0"
-               },
-               "MailKit": "1.4.0",
-               "System.Linq": "4.1.0",
-               "System.Threading": "4.0.11"
-           }
-        }
-    }
+  "version": "2.0.0",
+  "testRunner": "xunit",
+
+  "dependencies": {
+    "Serilog": "2.0.0",
+    "xunit": "2.2.0-*",
+    "dotnet-test-xunit": "2.2.0-preview2-build1029",
+    "Serilog.Sinks.Email": { "target": "project" }
+  },
+
+  "buildOptions": {
+    "keyFile": "../../assets/Serilog.snk"
+  },
+
+  "frameworks": {
+      "net4.5.2": {
+          "buildOptions": {
+              "define": [ "SYSTEM_NET" ]
+          },
+          "frameworkAssemblies": {
+              "System.Configuration": ""
+          }
+      },
+      "netcoreapp1.0": {
+          "buildOptions": {
+              "define": [ "MAIL_KIT" ]
+          },
+          "imports": [
+              "dnxcore50",
+              "portable-net45+win8"
+          ],
+          "dependencies": {
+              "Microsoft.NETCore.App": {
+                  "type": "platform",
+                  "version": "1.0.0"
+              },
+              "System.Linq": "4.1.0",
+              "System.Threading": "4.0.11"
+          }
+      }
+  }
 }

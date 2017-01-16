@@ -23,6 +23,8 @@ using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.PeriodicBatching;
+using Serilog.Formatting.Display;
+using System.Linq;
 
 namespace Serilog.Sinks.Email
 {
@@ -33,6 +35,8 @@ namespace Serilog.Sinks.Email
         readonly SmtpClient _smtpClient;
 
         readonly ITextFormatter _textFormatter;
+
+        readonly ITextFormatter _subjectLineFormatter;
 
         /// <summary>
         /// A reasonable default for the number of events posted in
@@ -52,13 +56,15 @@ namespace Serilog.Sinks.Email
         /// <param name="batchSizeLimit">The maximum number of events to post in a single batch.</param>
         /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="textFormatter">Supplies culture-specific formatting information, or null.</param>
-        public EmailSink(EmailConnectionInfo connectionInfo, int batchSizeLimit, TimeSpan period, ITextFormatter textFormatter)
+        /// <param name="subjectLineFormatter">Supplies culture-specific formatting information, or null.</param>
+        public EmailSink(EmailConnectionInfo connectionInfo, int batchSizeLimit, TimeSpan period, ITextFormatter textFormatter, ITextFormatter subjectLineFormatter)
             : base(batchSizeLimit, period)
         {
             if (connectionInfo == null) throw new ArgumentNullException(nameof(connectionInfo));
 
             _connectionInfo = connectionInfo;
             _textFormatter = textFormatter;
+            _subjectLineFormatter = subjectLineFormatter;
             _smtpClient = CreateSmtpClient();
             _smtpClient.SendCompleted += SendCompletedCallback;
         }
@@ -112,10 +118,13 @@ namespace Serilog.Sinks.Email
                 _textFormatter.Format(logEvent, payload);
             }
 
+            var subject = new StringWriter();
+            _subjectLineFormatter.Format(events.OrderByDescending(e => e.Level).First(), subject);
+
             var mailMessage = new MailMessage
             {
                 From = new MailAddress(_connectionInfo.FromEmail),
-                Subject = _connectionInfo.EmailSubject,
+                Subject = subject.ToString(),
                 Body = payload.ToString(),
                 BodyEncoding = Encoding.UTF8,
                 SubjectEncoding = Encoding.UTF8,

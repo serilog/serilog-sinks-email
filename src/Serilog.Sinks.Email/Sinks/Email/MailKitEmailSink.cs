@@ -37,6 +37,8 @@ namespace Serilog.Sinks.Email
 
         readonly ITextFormatter _textFormatter;
 
+        readonly ITextFormatter _subjectFormatter;
+
         /// <summary>
         /// A reasonable default for the number of events posted in
         /// each batch.
@@ -55,7 +57,9 @@ namespace Serilog.Sinks.Email
         /// <param name="batchSizeLimit">The maximum number of events to post in a single batch.</param>
         /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="textFormatter">Supplies culture-specific formatting information, or null.</param>
-        public EmailSink(EmailConnectionInfo connectionInfo, int batchSizeLimit, TimeSpan period, ITextFormatter textFormatter)
+        /// <param name="subjectLineFormatter">The subject line formatter.</param>
+        /// <exception cref="System.ArgumentNullException">connectionInfo</exception>
+        public EmailSink(EmailConnectionInfo connectionInfo, int batchSizeLimit, TimeSpan period, ITextFormatter textFormatter, ITextFormatter subjectLineFormatter)
             : base(batchSizeLimit, period)
         {
             if (connectionInfo == null) throw new ArgumentNullException(nameof(connectionInfo));
@@ -69,14 +73,15 @@ namespace Serilog.Sinks.Email
                 .ToArray();
 
             _textFormatter = textFormatter;
+            _subjectFormatter = subjectLineFormatter;
         }
         
-        private MimeKit.MimeMessage CreateMailMessage(string payload)
+        private MimeKit.MimeMessage CreateMailMessage(string payload, string subject)
         {
             var mailMessage = new MimeKit.MimeMessage();
             mailMessage.From.Add(_fromAddress);
             mailMessage.To.AddRange(_toAddresses);
-            mailMessage.Subject = _connectionInfo.EmailSubject;
+            mailMessage.Subject = subject;
             mailMessage.Body = _connectionInfo.IsBodyHtml
                 ? new MimeKit.BodyBuilder { HtmlBody = payload }.ToMessageBody()
                 : new MimeKit.BodyBuilder { TextBody = payload }.ToMessageBody();
@@ -101,7 +106,10 @@ namespace Serilog.Sinks.Email
                 _textFormatter.Format(logEvent, payload);
             }
 
-            var mailMessage = CreateMailMessage(payload.ToString());
+            var subject = new StringWriter();
+            _subjectFormatter.Format(events.OrderByDescending(e => e.Level).First(), subject);
+
+            var mailMessage = CreateMailMessage(payload.ToString(), subject.ToString());
 
             try
             {

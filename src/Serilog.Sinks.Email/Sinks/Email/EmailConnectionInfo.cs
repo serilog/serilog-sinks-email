@@ -65,7 +65,7 @@ namespace Serilog.Sinks.Email
         public string ToEmail { get; set; }
 
         /// <summary>
-        /// The subject to use for the email, this can be a template
+        /// The subject to use for the email, this can be a template.
         /// </summary>
         [DefaultValue(DefaultSubject)]
         public string EmailSubject { get; set; }

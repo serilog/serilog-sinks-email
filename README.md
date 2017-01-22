@@ -10,8 +10,8 @@ Sends log events by SMTP email.
 ```csharp
 var log = new LoggerConfiguration()
     .WriteTo.Email(
-        from: "app@example.com",
-        to: "support@example.com",
+        fromEmail: "app@example.com",
+        toEmail: "support@example.com",
         mailServer: "smtp.example.com")
     .CreateLogger();
 ```

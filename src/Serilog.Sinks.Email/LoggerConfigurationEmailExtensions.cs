@@ -42,7 +42,7 @@ namespace Serilog
         /// <param name="batchPostingLimit">The maximum number of events to post in a single batch.</param>
         /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
-        /// <param name="mailSubject">The subject used in error mails</param>
+        /// <param name="mailSubject">The subject, can be a plain string or a template such as {Timestamp} [{Level}] occurred.</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration Email(
@@ -84,7 +84,7 @@ namespace Serilog
         /// <param name="batchPostingLimit">The maximum number of events to post in a single batch.</param>
         /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
-        /// <param name="mailSubject">The subject used in error mails</param>
+        /// <param name="mailSubject">The subject, can be a plain string or a template such as {Timestamp} [{Level}] occurred.</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration Email(
@@ -130,7 +130,7 @@ namespace Serilog
         /// <param name="batchPostingLimit">The maximum number of events to post in a single batch.</param>
         /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
-        /// <param name="mailSubject">The subject used in error mails</param>
+        /// <param name="mailSubject">The subject, can be a plain string or a template such as {Timestamp} [{Level}] occurred.</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration Email(
@@ -173,7 +173,7 @@ namespace Serilog
         /// <param name="batchPostingLimit">The maximum number of events to post in a single batch.</param>
         /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
-        /// <param name="mailSubject">The subject used in error mails</param>
+        /// <param name="mailSubject">The subject, can be a plain string or a template such as {Timestamp} [{Level}] occurred.</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration Email(
@@ -188,11 +188,17 @@ namespace Serilog
         {
             if (connectionInfo == null) throw new ArgumentNullException("connectionInfo");
 
+            if (!string.IsNullOrEmpty(connectionInfo.EmailSubject))
+            {
+                mailSubject = connectionInfo.EmailSubject;
+            }
+
             var defaultedPeriod = period ?? EmailSink.DefaultPeriod;
             var formatter = new MessageTemplateTextFormatter(outputTemplate, formatProvider);
+            var subjectLineFormatter = new MessageTemplateTextFormatter(mailSubject, formatProvider);
 
             return loggerConfiguration.Sink(
-                new EmailSink(connectionInfo, batchPostingLimit, defaultedPeriod, formatter),
+                new EmailSink(connectionInfo, batchPostingLimit, defaultedPeriod, formatter, subjectLineFormatter),
                 restrictedToMinimumLevel);
         }
 
@@ -205,7 +211,7 @@ namespace Serilog
         /// <param name="batchPostingLimit">The maximum number of events to post in a single batch.</param>
         /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="textFormatter">ITextFormatter implementation to write log entry to email.</param>
-        /// <param name="mailSubject">The subject used in error mails</param>
+        /// <param name="mailSubject">The subject, can be a plain string or a template such as {Timestamp} [{Level}] occurred.</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration Email(
@@ -220,10 +226,12 @@ namespace Serilog
             if (connectionInfo == null) throw new ArgumentNullException("connectionInfo");
             if (textFormatter == null) throw new ArgumentNullException("textFormatter");
 
+            ITextFormatter mailSubjectFormatter = new MessageTemplateTextFormatter(mailSubject, null);
+
             var defaultedPeriod = period ?? EmailSink.DefaultPeriod;
 
             return loggerConfiguration.Sink(
-                new EmailSink(connectionInfo, batchPostingLimit, defaultedPeriod, textFormatter),
+                new EmailSink(connectionInfo, batchPostingLimit, defaultedPeriod, textFormatter, mailSubjectFormatter),
                 restrictedToMinimumLevel);
         }
     }

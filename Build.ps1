@@ -14,9 +14,15 @@ $revision = @{ $true = "{0:00000}" -f [convert]::ToInt32("0" + $env:APPVEYOR_BUI
 $suffix = @{ $true = ""; $false = "$($branch.Substring(0, [math]::Min(10,$branch.Length)))-$revision"}[$branch -eq "master" -and $revision -ne "local"]
 
 echo "build: Version suffix is $suffix"
-echo "build: Packaging project in $src"
-& dotnet pack "src\Serilog.Sinks.Email" -c Release -o "../../artifacts" --version-suffix=$suffix
-if($LASTEXITCODE -ne 0) { exit 1 }    
+foreach ($src in ls src/*) {
+  Push-Location $src
+  echo "build: Packaging project in $src"
+
+  & dotnet pack -c Release -o ..\..\artifacts --version-suffix=$suffix
+  if($LASTEXITCODE -ne 0) { exit 1 }
+
+  Pop-Location
+}
 
 foreach ($test in ls test/*.Tests) {
   Push-Location $test

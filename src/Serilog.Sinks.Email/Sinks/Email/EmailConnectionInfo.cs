@@ -75,6 +75,16 @@ namespace Serilog.Sinks.Email
         /// </summary>
         public bool EnableSsl { get; set; }
 
+#if MAIL_KIT
+        /// <summary>
+        /// Flag as true to disable SSL server certificate validation. Use
+        /// with cuation. This only works on `netstandard1.3`. If you
+        /// are targeting `net45`, you can use
+        /// `System.Net.ServicePointManager.ServerCertificateValidationCallback`.
+        /// </summary>
+        public bool DisableServerCertificateValidation { get; set; }
+#endif
+
         /// <summary>
         /// The SMTP email server to use.
         /// </summary>

@@ -130,6 +130,12 @@ namespace Serilog.Sinks.Email
             var smtpClient = new SmtpClient();
             if (!string.IsNullOrWhiteSpace(_connectionInfo.MailServer))
             {
+                if (_connectionInfo.DisableServerCertificateValidation)
+                {
+                    smtpClient.ServerCertificateValidationCallback +=
+                        (sender, certificate, chain, sslPolicyErrors) => true;
+                }
+
                 smtpClient.Connect(
                     _connectionInfo.MailServer, _connectionInfo.Port,
                     useSsl: _connectionInfo.EnableSsl);

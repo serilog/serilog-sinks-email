@@ -15,7 +15,7 @@ $suffix = @{ $true = ""; $false = "$($branch.Substring(0, [math]::Min(10,$branch
 
 echo "build: Version suffix is $suffix"
 echo "build: Packaging project in $src"
-& dotnet pack -c Release -o artifacts --version-suffix=$suffix
+& dotnet pack "src\Serilog.Sinks.Email" -c Release -o "../../artifacts" --version-suffix=$suffix
 if($LASTEXITCODE -ne 0) { exit 1 }    
 
 foreach ($test in ls test/*.Tests) {

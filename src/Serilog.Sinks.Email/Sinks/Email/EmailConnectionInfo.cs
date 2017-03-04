@@ -76,6 +76,17 @@ namespace Serilog.Sinks.Email
         public bool EnableSsl { get; set; }
 
         /// <summary>
+        /// Provides a method that validates server certificates.
+        /// </summary>
+        /// <remarks>
+        /// This only works on `netstandard1.3` with `MailKit`. If you
+        /// are targeting `net45`+, you should add your validation to 
+        /// `System.Net.ServicePointManager.ServerCertificateValidationCallback`
+        /// manually.
+        /// </remarks>
+        public System.Net.Security.RemoteCertificateValidationCallback ServerCertificateValidationCallback { get; set; }
+
+        /// <summary>
         /// The SMTP email server to use.
         /// </summary>
         public string MailServer { get; set; }

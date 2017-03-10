@@ -23,12 +23,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="artifacts\**" />
-    <EmbeddedResource Remove="artifacts\**" />
-    <None Remove="artifacts\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Serilog" Version="2.0.0" />
     <PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="2.0.0" />
   </ItemGroup>

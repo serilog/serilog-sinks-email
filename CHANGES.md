@@ -1,3 +1,9 @@
+2.2.2
+ * allow disabling SMTP SSL certification validation
+
+2.0
+ * enabled netstandard1.3 support using MailKit
+
 1.5
  * Moved from serilog/serilog
 

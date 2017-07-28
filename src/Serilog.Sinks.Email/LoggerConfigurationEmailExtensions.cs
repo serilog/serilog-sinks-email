@@ -20,6 +20,7 @@ using Serilog.Events;
 using Serilog.Formatting.Display;
 using Serilog.Sinks.Email;
 using Serilog.Formatting;
+using System.Net.Security;
 
 namespace Serilog
 {
@@ -43,6 +44,7 @@ namespace Serilog
         /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
         /// <param name="mailSubject">The subject, can be a plain string or a template such as {Timestamp} [{Level}] occurred.</param>
+        /// <param name="serverCertificateValidationCallback">Option to add callback for certificate validation on client Connect</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration Email(
@@ -54,7 +56,8 @@ namespace Serilog
             int batchPostingLimit = EmailSink.DefaultBatchPostingLimit,
             TimeSpan? period = null,
             IFormatProvider formatProvider = null,
-            string mailSubject = EmailConnectionInfo.DefaultSubject)
+            string mailSubject = EmailConnectionInfo.DefaultSubject,
+            RemoteCertificateValidationCallback serverCertificateValidationCallback = null)
         {
             if (loggerConfiguration == null) throw new ArgumentNullException("loggerConfiguration");
             if (fromEmail == null) throw new ArgumentNullException("fromEmail");
@@ -64,7 +67,8 @@ namespace Serilog
             {
                 FromEmail = fromEmail,
                 ToEmail = toEmail,
-                EmailSubject = mailSubject
+                EmailSubject = mailSubject,
+                ServerCertificateValidationCallback = serverCertificateValidationCallback
             };
 
             return Email(loggerConfiguration, connectionInfo, outputTemplate, restrictedToMinimumLevel, batchPostingLimit, period, formatProvider);
@@ -85,6 +89,7 @@ namespace Serilog
         /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
         /// <param name="mailSubject">The subject, can be a plain string or a template such as {Timestamp} [{Level}] occurred.</param>
+        /// <param name="serverCertificateValidationCallback">Option to add callback for certificate validation on client Connect</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration Email(
@@ -98,7 +103,8 @@ namespace Serilog
             int batchPostingLimit = EmailSink.DefaultBatchPostingLimit,
             TimeSpan? period = null,
             IFormatProvider formatProvider = null,
-            string mailSubject = EmailConnectionInfo.DefaultSubject)
+            string mailSubject = EmailConnectionInfo.DefaultSubject,
+            RemoteCertificateValidationCallback serverCertificateValidationCallback = null)
         {
             if (loggerConfiguration == null) throw new ArgumentNullException("loggerConfiguration");
             if (fromEmail == null) throw new ArgumentNullException("fromEmail");
@@ -110,7 +116,8 @@ namespace Serilog
                 ToEmail = toEmail,
                 MailServer = mailServer,
                 NetworkCredentials = networkCredential,
-                EmailSubject = mailSubject
+                EmailSubject = mailSubject,
+                ServerCertificateValidationCallback = serverCertificateValidationCallback
             };
 
             return Email(loggerConfiguration, connectionInfo, outputTemplate, restrictedToMinimumLevel, batchPostingLimit, period, formatProvider);
@@ -131,6 +138,7 @@ namespace Serilog
         /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
         /// <param name="mailSubject">The subject, can be a plain string or a template such as {Timestamp} [{Level}] occurred.</param>
+        /// <param name="serverCertificateValidationCallback">Option to add callback for certificate validation on client Connect</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration Email(
@@ -144,19 +152,21 @@ namespace Serilog
             int batchPostingLimit = EmailSink.DefaultBatchPostingLimit,
             TimeSpan? period = null,
             IFormatProvider formatProvider = null,
-            string mailSubject = EmailConnectionInfo.DefaultSubject)
+            string mailSubject = EmailConnectionInfo.DefaultSubject,
+            RemoteCertificateValidationCallback serverCertificateValidationCallback = null)
         {
             if (loggerConfiguration == null) throw new ArgumentNullException("loggerConfiguration");
             if (fromEmail == null) throw new ArgumentNullException("fromEmail");
             if (toEmails == null) throw new ArgumentNullException("toEmails");
-            
+
             var connectionInfo = new EmailConnectionInfo
             {
                 FromEmail = fromEmail,
                 ToEmail = string.Join(";", toEmails),
                 MailServer = mailServer,
                 NetworkCredentials = networkCredential,
-                EmailSubject = mailSubject
+                EmailSubject = mailSubject,
+                ServerCertificateValidationCallback = serverCertificateValidationCallback
             };
 
             return Email(loggerConfiguration, connectionInfo, outputTemplate, restrictedToMinimumLevel, batchPostingLimit, period, formatProvider, mailSubject);

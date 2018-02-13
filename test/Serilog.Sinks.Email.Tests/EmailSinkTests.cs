@@ -27,5 +27,27 @@ namespace Serilog.Sinks.Email.Tests
 
             Assert.Equal(Enumerable.Empty<string>(), selfLogMessages);
         }
+
+        [Fact(Skip = "Requires a localhost mail server")]
+        public void Works_with_non_standard_SMTP_port()
+        {
+            var selfLogMessages = new List<string>();
+            SelfLog.Enable(selfLogMessages.Add);
+
+            using (var emailLogger = new LoggerConfiguration()
+                .WriteTo.Email(
+                    fromEmail: "from@localhost.local",
+                    toEmail: "to@localhost.local",
+                    mailServer: "localhost",
+                    smtpPort: 2525,
+                    outputTemplate: "[{Level}] {Message}{NewLine}{Exception}",
+                    mailSubject: "subject")
+                .CreateLogger())
+            {
+                emailLogger.Information("test {test}", "test");
+            }
+
+            Assert.Equal(Enumerable.Empty<string>(), selfLogMessages);
+        }
     }
 }

@@ -25,7 +25,7 @@ namespace Serilog.Sinks.Email
         /// <summary>
         /// The default port used by for SMTP transfer.
         /// </summary>
-        const int DefaultPort = 25;
+        public const int DefaultPort = 25;
 
         /// <summary>
         /// The default subject used for email messages.

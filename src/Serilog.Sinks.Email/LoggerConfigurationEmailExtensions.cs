@@ -65,7 +65,7 @@ namespace Serilog
             var eventFormatter = new MessageTemplateTextFormatter(outputTemplate, formatProvider);
             var subjectFormatter = new MessageTemplateTextFormatter(mailSubject, formatProvider);
 
-            return BuildSink(loggerConfiguration, fromEmail, toEmail, eventFormatter, subjectFormatter, null, EmailConnectionInfo.DefaultPort, 
+            return BuildSink(loggerConfiguration, fromEmail, toEmail, eventFormatter, subjectFormatter, null, EmailConnectionInfo.DefaultPort,
                 null, restrictedToMinimumLevel, batchPostingLimit, period);
         }
 
@@ -107,7 +107,7 @@ namespace Serilog
             var eventFormatter = new MessageTemplateTextFormatter(outputTemplate, formatProvider);
             var subjectFormatter = new MessageTemplateTextFormatter(mailSubject, formatProvider);
 
-            return BuildSink(loggerConfiguration, fromEmail, toEmail, eventFormatter, subjectFormatter, mailServer, 
+            return BuildSink(loggerConfiguration, fromEmail, toEmail, eventFormatter, subjectFormatter, mailServer,
                 EmailConnectionInfo.DefaultPort, networkCredential, restrictedToMinimumLevel, batchPostingLimit, period);
         }
 
@@ -128,7 +128,6 @@ namespace Serilog
         /// <param name="mailSubject">The subject, can be a plain string or a template such as {Timestamp} [{Level}] occurred.</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
-        [Obsolete("New code should not be compiled against this obsolete overload"), EditorBrowsable(EditorBrowsableState.Never)]
         public static LoggerConfiguration Email(
             this LoggerSinkConfiguration loggerConfiguration,
             string fromEmail,
@@ -149,7 +148,7 @@ namespace Serilog
             var eventFormatter = new MessageTemplateTextFormatter(outputTemplate, formatProvider);
             var subjectFormatter = new MessageTemplateTextFormatter(mailSubject, formatProvider);
 
-            return BuildSink(loggerConfiguration, fromEmail, String.Join(";", toEmails), eventFormatter, subjectFormatter, mailServer, 
+            return BuildSink(loggerConfiguration, fromEmail, String.Join(";", toEmails), eventFormatter, subjectFormatter, mailServer,
                 EmailConnectionInfo.DefaultPort, networkCredential, restrictedToMinimumLevel, batchPostingLimit, period);
         }
 

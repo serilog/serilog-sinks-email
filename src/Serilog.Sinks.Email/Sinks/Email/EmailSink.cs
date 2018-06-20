@@ -136,6 +136,14 @@ namespace Serilog.Sinks.Email
                 mailMessage.To.Add(recipient);
             }
 
+            if (!string.IsNullOrEmpty(_connectionInfo.BccEmail))
+            {
+                foreach (var bccRecipient in _connectionInfo.BccEmail.Split(",;".ToCharArray(), StringSplitOptions.RemoveEmptyEntries))
+                {
+                    mailMessage.Bcc.Add(bccRecipient);
+                }
+            }
+
             await _smtpClient.SendMailAsync(mailMessage);
         }
 

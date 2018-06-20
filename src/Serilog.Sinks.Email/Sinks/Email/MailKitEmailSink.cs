@@ -34,6 +34,7 @@ namespace Serilog.Sinks.Email
 
         readonly MimeKit.InternetAddress _fromAddress;
         readonly IEnumerable<MimeKit.InternetAddress> _toAddresses;
+        readonly IEnumerable<MimeKit.InternetAddress> _bccAddresses;
 
         readonly ITextFormatter _textFormatter;
 
@@ -72,6 +73,15 @@ namespace Serilog.Sinks.Email
                 .Select(MimeKit.MailboxAddress.Parse)
                 .ToArray();
 
+            if (!string.IsNullOrEmpty(connectionInfo.ToEmail))
+            {
+                _bccAddresses = connectionInfo
+                    .ToEmail
+                    .Split(",;".ToCharArray(), StringSplitOptions.RemoveEmptyEntries)
+                    .Select(MimeKit.MailboxAddress.Parse)
+                    .ToArray();
+            }
+    
             _textFormatter = textFormatter;
             _subjectFormatter = subjectLineFormatter;
         }
@@ -81,6 +91,12 @@ namespace Serilog.Sinks.Email
             var mailMessage = new MimeKit.MimeMessage();
             mailMessage.From.Add(_fromAddress);
             mailMessage.To.AddRange(_toAddresses);
+
+            if (_bccAddresses != null)
+            {
+                mailMessage.Bcc.AddRange(_bccAddresses);
+            }
+
             mailMessage.Subject = subject;
             mailMessage.Body = _connectionInfo.IsBodyHtml
                 ? new MimeKit.BodyBuilder { HtmlBody = payload }.ToMessageBody()

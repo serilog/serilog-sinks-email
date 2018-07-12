@@ -1,11 +1,11 @@
 // Copyright 2014 Serilog Contributors
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -80,7 +80,7 @@ namespace Serilog.Sinks.Email
         /// </summary>
         /// <remarks>
         /// This only works on `netstandard1.3` with `MailKit`. If you
-        /// are targeting `net45`+, you should add your validation to 
+        /// are targeting `net45`+, you should add your validation to
         /// `System.Net.ServicePointManager.ServerCertificateValidationCallback`
         /// manually.
         /// </remarks>
@@ -95,5 +95,14 @@ namespace Serilog.Sinks.Email
         /// Sets whether the body contents of the email is HTML. Defaults to false.
         /// </summary>
         public bool IsBodyHtml { get; set; }
+
+        internal virtual IEmailTransport CreateEmailTransport()
+        {
+#if SYSTEM_NET
+            return new SystemMailEmailTransport(this);
+#else
+                  return new MailKitEmailTransport(this);
+#endif
+        }
     }
 }

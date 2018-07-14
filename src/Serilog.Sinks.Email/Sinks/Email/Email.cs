@@ -16,7 +16,7 @@ using System.Collections.Generic;
 
 namespace Serilog.Sinks.Email
 {
-    internal class Email
+    public class Email
     {
         public string From { get; set; }
 

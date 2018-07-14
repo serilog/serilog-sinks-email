@@ -89,10 +89,26 @@ namespace Serilog.Sinks.Email
                 Subject = subject.ToString(),
                 Body = payload.ToString(),
                 IsBodyHtml = _connectionInfo.IsBodyHtml,
-                To = _connectionInfo.ToEmail.Split(",;".ToCharArray(), StringSplitOptions.RemoveEmptyEntries)
+                To = _connectionInfo.ToEmail.Split(";".ToCharArray(), StringSplitOptions.RemoveEmptyEntries)
             };
 
             await _emailTransport.SendMailAsync(email);
+        }
+        
+        /// <summary>
+        /// Free resources held by the sink.
+        /// </summary>
+        /// <param name="disposing">If true, called because the object is being disposed; if false,
+        /// the object is being disposed from the finalizer.</param>
+        protected override void Dispose(bool disposing)
+        {
+            // First flush the buffer
+            base.Dispose(disposing);
+
+            if (disposing)
+            {
+                _emailTransport.Dispose();
+            }
         }
     }
 }

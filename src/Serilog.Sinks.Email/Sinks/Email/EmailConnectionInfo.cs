@@ -96,12 +96,13 @@ namespace Serilog.Sinks.Email
         /// </summary>
         public bool IsBodyHtml { get; set; }
 
-        internal virtual IEmailTransport CreateEmailTransport()
+        protected internal virtual IEmailTransport CreateEmailTransport()
         {
 #if SYSTEM_NET
             return new SystemMailEmailTransport(this);
-#else
-                  return new MailKitEmailTransport(this);
+#endif
+#if MAIL_KIT
+            return new MailKitEmailTransport(this);
 #endif
         }
     }

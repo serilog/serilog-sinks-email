@@ -15,7 +15,7 @@ artifacts:
 - path: artifacts/Serilog.*.nupkg
 only_commits:
   files:
-    - serilog.sinks.email.sln
+    - serilog-sinks-email.sln
     - src/Serilog.Sinks.Email/
     - Build.ps1
     - assets/

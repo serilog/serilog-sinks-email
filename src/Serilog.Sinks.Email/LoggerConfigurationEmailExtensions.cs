@@ -123,9 +123,9 @@ namespace Serilog
         /// <param name="fromEmail">The email address emails will be sent from</param>
         /// <param name="toEmail">The email address emails will be sent to</param>
         /// <param name="mailServer">The SMTP email server to use</param>
-        /// <param name="port">The port of the mailServer</param>
         /// <param name="username">The username to use to authenticate with mailServer</param>
         /// <param name="password">The password to use to authenticate with mailServer</param>
+        /// <param name="port">The port of the mailServer</param>
         /// <param name="outputTemplate">A message template describing the format used to write to the sink.
         /// the default is "{Timestamp} [{Level}] {Message}{NewLine}{Exception}".</param>
         /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
@@ -140,9 +140,9 @@ namespace Serilog
             string fromEmail,
             string toEmail,
             string mailServer,
+            string username,
+            string password,
             int port = 25,
-            string username = null,
-            string password = null,
             string outputTemplate = DefaultOutputTemplate,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             int batchPostingLimit = EmailSink.DefaultBatchPostingLimit,

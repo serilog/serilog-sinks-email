@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Description>The file sink for Serilog support TLS 1.2</Description>
-    <VersionPrefix>2.3.1-TLS-1.2</VersionPrefix>
+    <Description>The file sink for Serilog</Description>
+    <VersionPrefix>2.3.1</VersionPrefix>
     <Authors>Serilog Contributors</Authors>
     <TargetFrameworks>net45;netstandard1.3</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -10,12 +10,12 @@
     <AssemblyOriginatorKeyFile>../../assets/Serilog.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
-    <PackageId>Serilog.Sinks.Email.TLS1.2</PackageId>
+    <PackageId>Serilog.Sinks.Email</PackageId>
     <PackageTags>serilog;file;io</PackageTags>
     <PackageIconUrl>http://serilog.net/images/serilog-sink-nuget.png</PackageIconUrl>
     <PackageProjectUrl>http://serilog.net</PackageProjectUrl>
     <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
-    <RepositoryUrl>https://github.com/mmarzullo/serilog-sinks-email-tls1.2</RepositoryUrl>
+    <RepositoryUrl>https://github.com/serilog/serilog-sinks-email</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>

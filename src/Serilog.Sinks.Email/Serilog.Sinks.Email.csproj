@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>The file sink for Serilog support TLS 1.2</Description>
-    <VersionPrefix>2.3.1.1</VersionPrefix>
+    <VersionPrefix>2.3.1-TLS-1.2</VersionPrefix>
     <Authors>Serilog Contributors</Authors>
     <TargetFrameworks>net45;netstandard1.3</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>

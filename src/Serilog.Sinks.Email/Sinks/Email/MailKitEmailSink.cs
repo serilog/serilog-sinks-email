@@ -1,11 +1,11 @@
 // Copyright 2014 Serilog Contributors
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -75,7 +75,7 @@ namespace Serilog.Sinks.Email
             _textFormatter = textFormatter;
             _subjectFormatter = subjectLineFormatter;
         }
-        
+
         private MimeKit.MimeMessage CreateMailMessage(string payload, string subject)
         {
             var mailMessage = new MimeKit.MimeMessage();
@@ -85,7 +85,7 @@ namespace Serilog.Sinks.Email
             mailMessage.Body = _connectionInfo.IsBodyHtml
                 ? new MimeKit.BodyBuilder { HtmlBody = payload }.ToMessageBody()
                 : new MimeKit.BodyBuilder { TextBody = payload }.ToMessageBody();
-            return mailMessage;            
+            return mailMessage;
         }
 
         /// <summary>
@@ -106,10 +106,9 @@ namespace Serilog.Sinks.Email
                 _textFormatter.Format(logEvent, payload);
             }
 
-            var subject = new StringWriter();
-            _subjectFormatter.Format(events.OrderByDescending(e => e.Level).First(), subject);
+            var subject = ComputeMailSubject(_subjectFormatter, events);
 
-            var mailMessage = CreateMailMessage(payload.ToString(), subject.ToString());
+            var mailMessage = CreateMailMessage(payload.ToString(), subject);
 
             try
             {
@@ -148,6 +147,15 @@ namespace Serilog.Sinks.Email
                 }
             }
             return smtpClient;
+        }
+        public static string ComputeMailSubject(ITextFormatter subjectLineFormatter, IEnumerable<LogEvent> events)
+        {
+            var subject = new StringWriter();
+            subjectLineFormatter.Format(events.OrderByDescending(e => e.Level).First(), subject);
+            var subjectAsText = subject.ToString();
+            var firstLineOfSubject = subjectAsText.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
+                                         .FirstOrDefault() ?? string.Empty;
+            return firstLineOfSubject;
         }
     }
 }

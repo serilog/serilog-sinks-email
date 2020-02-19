@@ -83,7 +83,7 @@ namespace Serilog.Sinks.Email
         /// <param name="logEvent">The log event to write.</param>
         public void Emit(LogEvent logEvent)
         {
-            SelfLog.WriteLine("The email sink only supports batched log events.");
+            Task.Run(() => EmitBatchAsync(new [] { logEvent }));
         }
 
         /// <summary>

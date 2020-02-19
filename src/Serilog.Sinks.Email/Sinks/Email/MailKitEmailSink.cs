@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Serilog.Core;
 using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting;
@@ -28,7 +29,7 @@ using System.Threading.Tasks;
 
 namespace Serilog.Sinks.Email
 {
-    class EmailSink : PeriodicBatchingSink
+    class EmailSink : IBatchedLogEventSink, ILogEventSink
     {
         readonly EmailConnectionInfo _connectionInfo;
 
@@ -39,28 +40,16 @@ namespace Serilog.Sinks.Email
 
         readonly ITextFormatter _subjectFormatter;
 
-        /// <summary>
-        /// A reasonable default for the number of events posted in
-        /// each batch.
-        /// </summary>
-        public const int DefaultBatchPostingLimit = 100;
-
-        /// <summary>
-        /// A reasonable default time to wait between checking for event batches.
-        /// </summary>
-        public static readonly TimeSpan DefaultPeriod = TimeSpan.FromSeconds(30);
+        private static Task CompletedTask = Task.FromResult(false); // The value is irrelevant as it just marks a completed operation.
 
         /// <summary>
         /// Construct a sink emailing with the specified details.
         /// </summary>
         /// <param name="connectionInfo">Connection information used to construct the SMTP client and mail messages.</param>
-        /// <param name="batchSizeLimit">The maximum number of events to post in a single batch.</param>
-        /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="textFormatter">Supplies culture-specific formatting information, or null.</param>
         /// <param name="subjectLineFormatter">The subject line formatter.</param>
         /// <exception cref="System.ArgumentNullException">connectionInfo</exception>
-        public EmailSink(EmailConnectionInfo connectionInfo, int batchSizeLimit, TimeSpan period, ITextFormatter textFormatter, ITextFormatter subjectLineFormatter)
-            : base(batchSizeLimit, period)
+        public EmailSink(EmailConnectionInfo connectionInfo, ITextFormatter textFormatter, ITextFormatter subjectLineFormatter)
         {
             if (connectionInfo == null) throw new ArgumentNullException(nameof(connectionInfo));
 
@@ -89,12 +78,19 @@ namespace Serilog.Sinks.Email
         }
 
         /// <summary>
+        /// Emit the provided log event to the sink.
+        /// </summary>
+        /// <param name="logEvent">The log event to write.</param>
+        public void Emit(LogEvent logEvent)
+        {
+            SelfLog.WriteLine("The email sink only supports batched log events.");
+        }
+
+        /// <summary>
         /// Emit a batch of log events, running asynchronously.
         /// </summary>
         /// <param name="events">The events to emit.</param>
-        /// <remarks>Override either <see cref="PeriodicBatchingSink.EmitBatch"/> or <see cref="PeriodicBatchingSink.EmitBatchAsync"/>,
-        /// not both.</remarks>
-        protected override async Task EmitBatchAsync(IEnumerable<LogEvent> events)
+        public async Task EmitBatchAsync(IEnumerable<LogEvent> events)
         {
             if (events == null)
                 throw new ArgumentNullException(nameof(events));
@@ -123,6 +119,16 @@ namespace Serilog.Sinks.Email
             {
                 SelfLog.WriteLine("Failed to send email: {0}", ex.ToString());
             }
+        }
+
+        /// <summary>
+        /// Allows sinks to perform periodic work without requiring additional threads
+        /// or timers (thus avoiding additional flush/shut-down complexity).
+        /// </summary>
+        /// <returns></returns>
+        public Task OnEmptyBatchAsync()
+        {
+            return CompletedTask;
         }
 
         private SmtpClient OpenConnectedSmtpClient()

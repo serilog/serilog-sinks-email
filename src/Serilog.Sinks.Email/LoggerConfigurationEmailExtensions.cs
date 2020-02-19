@@ -39,8 +39,6 @@ namespace Serilog
         /// <param name="outputTemplate">A message template describing the format used to write to the sink.
         /// the default is "{Timestamp} [{Level}] {Message}{NewLine}{Exception}".</param>
         /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
-        /// <param name="batchPostingLimit">The maximum number of events to post in a single batch.</param>
-        /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
         /// <param name="mailSubject">The subject, can be a plain string or a template such as {Timestamp} [{Level}] occurred.</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
@@ -51,8 +49,6 @@ namespace Serilog
             string toEmail,
             string outputTemplate = DefaultOutputTemplate,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-            int batchPostingLimit = EmailSink.DefaultBatchPostingLimit,
-            TimeSpan? period = null,
             IFormatProvider formatProvider = null,
             string mailSubject = EmailConnectionInfo.DefaultSubject)
         {
@@ -67,7 +63,7 @@ namespace Serilog
                 EmailSubject = mailSubject
             };
 
-            return Email(loggerConfiguration, connectionInfo, outputTemplate, restrictedToMinimumLevel, batchPostingLimit, period, formatProvider);
+            return Email(loggerConfiguration, connectionInfo, outputTemplate, restrictedToMinimumLevel, formatProvider);
         }
 
         /// <summary>
@@ -81,8 +77,6 @@ namespace Serilog
         /// <param name="outputTemplate">A message template describing the format used to write to the sink.
         /// the default is "{Timestamp} [{Level}] {Message}{NewLine}{Exception}".</param>
         /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
-        /// <param name="batchPostingLimit">The maximum number of events to post in a single batch.</param>
-        /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
         /// <param name="mailSubject">The subject, can be a plain string or a template such as {Timestamp} [{Level}] occurred.</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
@@ -95,8 +89,6 @@ namespace Serilog
             ICredentialsByHost networkCredential = null,
             string outputTemplate = DefaultOutputTemplate,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-            int batchPostingLimit = EmailSink.DefaultBatchPostingLimit,
-            TimeSpan? period = null,
             IFormatProvider formatProvider = null,
             string mailSubject = EmailConnectionInfo.DefaultSubject)
         {
@@ -113,7 +105,7 @@ namespace Serilog
                 EmailSubject = mailSubject
             };
 
-            return Email(loggerConfiguration, connectionInfo, outputTemplate, restrictedToMinimumLevel, batchPostingLimit, period, formatProvider);
+            return Email(loggerConfiguration, connectionInfo, outputTemplate, restrictedToMinimumLevel, formatProvider);
         }
 
         /// <summary>
@@ -127,8 +119,6 @@ namespace Serilog
         /// <param name="outputTemplate">A message template describing the format used to write to the sink.
         /// the default is "{Timestamp} [{Level}] {Message}{NewLine}{Exception}".</param>
         /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
-        /// <param name="batchPostingLimit">The maximum number of events to post in a single batch.</param>
-        /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
         /// <param name="mailSubject">The subject, can be a plain string or a template such as {Timestamp} [{Level}] occurred.</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
@@ -141,8 +131,6 @@ namespace Serilog
             ICredentialsByHost networkCredential = null,
             string outputTemplate = DefaultOutputTemplate,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-            int batchPostingLimit = EmailSink.DefaultBatchPostingLimit,
-            TimeSpan? period = null,
             IFormatProvider formatProvider = null,
             string mailSubject = EmailConnectionInfo.DefaultSubject)
         {
@@ -159,7 +147,7 @@ namespace Serilog
                 EmailSubject = mailSubject
             };
 
-            return Email(loggerConfiguration, connectionInfo, outputTemplate, restrictedToMinimumLevel, batchPostingLimit, period, formatProvider, mailSubject);
+            return Email(loggerConfiguration, connectionInfo, outputTemplate, restrictedToMinimumLevel, formatProvider, mailSubject);
         }
 
         /// <summary>
@@ -170,8 +158,6 @@ namespace Serilog
         /// <param name="outputTemplate">A message template describing the format used to write to the sink.
         /// the default is "{Timestamp} [{Level}] {Message}{NewLine}{Exception}".</param>
         /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
-        /// <param name="batchPostingLimit">The maximum number of events to post in a single batch.</param>
-        /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
         /// <param name="mailSubject">The subject, can be a plain string or a template such as {Timestamp} [{Level}] occurred.</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
@@ -181,8 +167,6 @@ namespace Serilog
             EmailConnectionInfo connectionInfo,
             string outputTemplate = DefaultOutputTemplate,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-            int batchPostingLimit = EmailSink.DefaultBatchPostingLimit,
-            TimeSpan? period = null,
             IFormatProvider formatProvider = null,
             string mailSubject = EmailConnectionInfo.DefaultSubject)
         {
@@ -193,12 +177,11 @@ namespace Serilog
                 mailSubject = connectionInfo.EmailSubject;
             }
 
-            var defaultedPeriod = period ?? EmailSink.DefaultPeriod;
             var formatter = new MessageTemplateTextFormatter(outputTemplate, formatProvider);
             var subjectLineFormatter = new MessageTemplateTextFormatter(mailSubject, formatProvider);
 
             return loggerConfiguration.Sink(
-                new EmailSink(connectionInfo, batchPostingLimit, defaultedPeriod, formatter, subjectLineFormatter),
+                new EmailSink(connectionInfo, formatter, subjectLineFormatter),
                 restrictedToMinimumLevel);
         }
 
@@ -208,8 +191,6 @@ namespace Serilog
         /// <param name="loggerConfiguration">The logger configuration.</param>
         /// <param name="connectionInfo">The connection info used for </param>
         /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
-        /// <param name="batchPostingLimit">The maximum number of events to post in a single batch.</param>
-        /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="textFormatter">ITextFormatter implementation to write log entry to email.</param>
         /// <param name="mailSubject">The subject, can be a plain string or a template such as {Timestamp} [{Level}] occurred.</param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
@@ -219,8 +200,6 @@ namespace Serilog
             EmailConnectionInfo connectionInfo,
             ITextFormatter textFormatter,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-            int batchPostingLimit = EmailSink.DefaultBatchPostingLimit,
-            TimeSpan? period = null,
             string mailSubject = EmailConnectionInfo.DefaultSubject)
         {
             if (connectionInfo == null) throw new ArgumentNullException("connectionInfo");
@@ -228,10 +207,8 @@ namespace Serilog
 
             ITextFormatter mailSubjectFormatter = new MessageTemplateTextFormatter(mailSubject, null);
 
-            var defaultedPeriod = period ?? EmailSink.DefaultPeriod;
-
             return loggerConfiguration.Sink(
-                new EmailSink(connectionInfo, batchPostingLimit, defaultedPeriod, textFormatter, mailSubjectFormatter),
+                new EmailSink(connectionInfo, textFormatter, mailSubjectFormatter),
                 restrictedToMinimumLevel);
         }
     }

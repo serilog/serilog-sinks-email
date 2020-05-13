@@ -220,14 +220,14 @@ namespace Serilog
                 mailSubject = connectionInfo.EmailSubject;
             }
 
-            var defaultedPeriod = period ?? DefaultPeriod;
+            var batchingPeriod = period ?? DefaultPeriod;
             var textFormatter = new MessageTemplateTextFormatter(outputTemplate, formatProvider);
             var mailSubjectFormatter = new MessageTemplateTextFormatter(mailSubject, formatProvider);
 
             var batchingOptions = new PeriodicBatchingSinkOptions
             {
                 BatchSizeLimit = batchPostingLimit,
-                Period = defaultedPeriod,
+                Period = batchingPeriod,
                 EagerlyEmitFirstEvent = false,  // set default to false, not usable for emailing
                 QueueLimit = 10000
             };
@@ -267,12 +267,12 @@ namespace Serilog
 
             ITextFormatter mailSubjectFormatter = new MessageTemplateTextFormatter(mailSubject, null);
 
-            var defaultedPeriod = period ?? DefaultPeriod;
+            var batchingPeriod = period ?? DefaultPeriod;
 
             var batchingOptions = new PeriodicBatchingSinkOptions
             {
                 BatchSizeLimit = batchPostingLimit,
-                Period = defaultedPeriod,
+                Period = batchingPeriod,
                 EagerlyEmitFirstEvent = false,  // set default to false, not usable for emailing
                 QueueLimit = 10000
             };

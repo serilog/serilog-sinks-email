@@ -13,7 +13,7 @@ for:
 -
   matrix:
     only:
-      - image: Ubuntu1804
+      - image: Ubuntu
   install:
   - sh setup.sh
   build_script:

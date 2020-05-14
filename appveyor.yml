@@ -14,8 +14,8 @@ for:
   matrix:
     only:
       - image: Ubuntu
-  install:
-  - sh setup.sh
+#  install:
+#  - sh setup.sh
   build_script:
   - sh build.sh
 artifacts:

@@ -1,18 +1,26 @@
 version: '{build}'
 skip_tags: true
-image: Visual Studio 2017
+image:
+- Visual Studio 2019
+- Ubuntu
 configuration: Release
-install:
-  - ps: mkdir -Force ".\build\" | Out-Null
-  - ps: Invoke-WebRequest "https://raw.githubusercontent.com/dotnet/cli/rel/1.0.0/scripts/obtain/dotnet-install.ps1" -OutFile ".\build\installcli.ps1"
-  - ps: $env:DOTNET_INSTALL_DIR = "$pwd\.dotnetcli"
-  - ps: '& .\build\installcli.ps1 -InstallDir "$env:DOTNET_INSTALL_DIR" -NoPath -Version 1.0.1'
-  - ps: $env:Path = "$env:DOTNET_INSTALL_DIR;$env:Path"
+test: off
+#install:
+#- ps: ./Setup.ps1
 build_script:
 - ps: ./Build.ps1
-test: off
+for:
+-
+  matrix:
+    only:
+      - image: Ubuntu
+#  install:
+#  - sh setup.sh
+  build_script:
+  - sh build.sh
 artifacts:
 - path: artifacts/Serilog.*.nupkg
+- path: artifacts/Serilog.*.snupkg
 deploy:
 - provider: NuGet
   api_key:
@@ -23,7 +31,9 @@ deploy:
 - provider: GitHub
   auth_token:
     secure: p4LpVhBKxGS5WqucHxFQ5c7C8cP74kbNB0Z8k9Oxx/PMaDQ1+ibmoexNqVU5ZlmX
-  artifact: /Serilog.*\.nupkg/
+  artifact:
+    /Serilog.*\.nupkg/
+    /Serilog.*\.snupkg/
   tag: v$(appveyor_build_version)
   on:
     branch: master

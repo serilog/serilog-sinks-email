@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 #if SYSTEM_NET
 
 using System;
@@ -28,7 +29,7 @@ using System.Linq;
 
 namespace Serilog.Sinks.Email
 {
-    class EmailSink : PeriodicBatchingSink
+    class EmailSink : IBatchedLogEventSink, IDisposable
     {
         readonly EmailConnectionInfo _connectionInfo;
 
@@ -39,26 +40,13 @@ namespace Serilog.Sinks.Email
         readonly ITextFormatter _subjectLineFormatter;
 
         /// <summary>
-        /// A reasonable default for the number of events posted in
-        /// each batch.
-        /// </summary>
-        public const int DefaultBatchPostingLimit = 100;
-
-        /// <summary>
-        /// A reasonable default time to wait between checking for event batches.
-        /// </summary>
-        public static readonly TimeSpan DefaultPeriod = TimeSpan.FromSeconds(30);
-
-        /// <summary>
         /// Construct a sink emailing with the specified details.
         /// </summary>
         /// <param name="connectionInfo">Connection information used to construct the SMTP client and mail messages.</param>
-        /// <param name="batchSizeLimit">The maximum number of events to post in a single batch.</param>
-        /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="textFormatter">Supplies culture-specific formatting information, or null.</param>
         /// <param name="subjectLineFormatter">Supplies culture-specific formatting information, or null.</param>
-        public EmailSink(EmailConnectionInfo connectionInfo, int batchSizeLimit, TimeSpan period, ITextFormatter textFormatter, ITextFormatter subjectLineFormatter)
-            : base(batchSizeLimit, period)
+        /// <exception cref="System.ArgumentNullException">connectionInfo</exception>
+        public EmailSink(EmailConnectionInfo connectionInfo, ITextFormatter textFormatter, ITextFormatter subjectLineFormatter)
         {
             if (connectionInfo == null) throw new ArgumentNullException(nameof(connectionInfo));
 
@@ -86,18 +74,13 @@ namespace Serilog.Sinks.Email
             }
         }
 
+
         /// <summary>
         /// Free resources held by the sink.
         /// </summary>
-        /// <param name="disposing">If true, called because the object is being disposed; if false,
-        /// the object is being disposed from the finalizer.</param>
-        protected override void Dispose(bool disposing)
+        public void Dispose()
         {
-            // First flush the buffer
-            base.Dispose(disposing);
-
-            if (disposing)
-                _smtpClient.Dispose();
+            _smtpClient.Dispose();
         }
 
         /// <summary>
@@ -106,7 +89,7 @@ namespace Serilog.Sinks.Email
         /// <param name="events">The events to emit.</param>
         /// <remarks>Override either <see cref="PeriodicBatchingSink.EmitBatch"/> or <see cref="PeriodicBatchingSink.EmitBatchAsync"/>,
         /// not both.</remarks>
-        protected override async Task EmitBatchAsync(IEnumerable<LogEvent> events)
+        public async Task EmitBatchAsync(IEnumerable<LogEvent> events)
         {
             if (events == null)
                 throw new ArgumentNullException(nameof(events));
@@ -137,6 +120,11 @@ namespace Serilog.Sinks.Email
             }
 
             await _smtpClient.SendMailAsync(mailMessage);
+        }
+
+        public Task OnEmptyBatchAsync()
+        {
+            return Task.FromResult(false);
         }
 
         private SmtpClient CreateSmtpClient()

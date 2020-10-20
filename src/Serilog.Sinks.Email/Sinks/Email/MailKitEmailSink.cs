@@ -1,11 +1,11 @@
 // Copyright 2014 Serilog Contributors
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -61,7 +61,7 @@ namespace Serilog.Sinks.Email
             _textFormatter = textFormatter;
             _subjectFormatter = subjectLineFormatter;
         }
-        
+
         private MimeKit.MimeMessage CreateMailMessage(string payload, string subject)
         {
             var mailMessage = new MimeKit.MimeMessage();
@@ -71,7 +71,7 @@ namespace Serilog.Sinks.Email
             mailMessage.Body = _connectionInfo.IsBodyHtml
                 ? new MimeKit.BodyBuilder { HtmlBody = payload }.ToMessageBody()
                 : new MimeKit.BodyBuilder { TextBody = payload }.ToMessageBody();
-            return mailMessage;            
+            return mailMessage;
         }
 
         /// <summary>
@@ -126,9 +126,13 @@ namespace Serilog.Sinks.Email
                     smtpClient.ServerCertificateValidationCallback += _connectionInfo.ServerCertificateValidationCallback;
                 }
 
-                smtpClient.Connect(
-                    _connectionInfo.MailServer, _connectionInfo.Port,
-                    useSsl: _connectionInfo.EnableSsl);
+                if (_connectionInfo.SecureSocketOption.HasValue)
+                    smtpClient.Connect(_connectionInfo.MailServer, _connectionInfo.Port,
+                        (MailKit.Security.SecureSocketOptions) _connectionInfo.SecureSocketOption.Value);
+                else
+                    smtpClient.Connect(
+                        _connectionInfo.MailServer, _connectionInfo.Port,
+                        useSsl: _connectionInfo.EnableSsl);
 
                 if (_connectionInfo.NetworkCredentials != null)
                 {

@@ -264,6 +264,11 @@ namespace Serilog
         {
             if (connectionInfo == null) throw new ArgumentNullException("connectionInfo");
             if (textFormatter == null) throw new ArgumentNullException("textFormatter");
+            
+            if (!string.IsNullOrEmpty(connectionInfo.EmailSubject))
+            {
+                mailSubject = connectionInfo.EmailSubject;
+            }
 
             ITextFormatter mailSubjectFormatter = new MessageTemplateTextFormatter(mailSubject, null);
 

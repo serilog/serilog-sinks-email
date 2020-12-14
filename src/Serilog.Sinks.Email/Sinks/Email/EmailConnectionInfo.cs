@@ -40,6 +40,7 @@ namespace Serilog.Sinks.Email
             Port = DefaultPort;
             EmailSubject = DefaultSubject;
             IsBodyHtml = false;
+            NetworkCredentials = new NetworkCredential();
         }
 
         /// <summary>

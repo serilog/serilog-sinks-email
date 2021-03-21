@@ -33,18 +33,24 @@ namespace Serilog.Sinks.Email
         public const string DefaultSubject = "Log Email";
 
         /// <summary>
-        /// Constructs the <see cref="EmailConnectionInfo"/> with the default port and default email subject set.
+        /// The default credentials used for authentication.
+        /// </summary>
+        static readonly NetworkCredential DefaultCredentials = CredentialCache.DefaultNetworkCredentials;
+
+        /// <summary>
+        /// Constructs the <see cref="EmailConnectionInfo"/> with the default credentials, default port and default email subject set.
         /// </summary>
         public EmailConnectionInfo()
         {
             Port = DefaultPort;
             EmailSubject = DefaultSubject;
             IsBodyHtml = false;
-            NetworkCredentials = new NetworkCredential();
+            NetworkCredentials = DefaultCredentials;
         }
 
         /// <summary>
         /// Gets or sets the credentials used for authentication.
+        /// Default value is <see cref="CredentialCache.DefaultNetworkCredentials"/>.
         /// </summary>
         public ICredentialsByHost NetworkCredentials { get; set; }
 

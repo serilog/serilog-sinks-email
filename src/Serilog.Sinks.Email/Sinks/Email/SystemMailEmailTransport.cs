@@ -23,7 +23,7 @@ namespace Serilog.Sinks.Email
 {
     class SystemMailEmailTransport : IEmailTransport
     {
-        private readonly SmtpClient _smtpClient;
+        readonly SmtpClient _smtpClient;
 
         public SystemMailEmailTransport(EmailConnectionInfo connectionInfo)
         {

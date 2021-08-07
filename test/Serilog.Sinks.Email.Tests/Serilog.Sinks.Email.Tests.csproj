@@ -47,7 +47,7 @@
     <DefineConstants>$(DefineConstants);MAIL_KIT</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
-    <DefineConstants>$(DefineConstants);MAIL_KIT</DefineConstants>
+    <DefineConstants>$(DefineConstants);MAIL_KIT;NEW_ARGUMENTOUTOFRANGEEXCEPTION_MESSAGE</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.2' ">

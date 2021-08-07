@@ -21,7 +21,7 @@ using Serilog.Debugging;
 
 namespace Serilog.Sinks.Email
 {
-    internal class SystemMailEmailTransport : IEmailTransport
+    class SystemMailEmailTransport : IEmailTransport
     {
         private readonly SmtpClient _smtpClient;
 
@@ -31,19 +31,19 @@ namespace Serilog.Sinks.Email
             _smtpClient.SendCompleted += SendCompletedCallback;
         }
 
-        public async Task SendMailAsync(Sinks.Email.Email email)
+        public async Task SendMailAsync(EmailMessage emailMessage)
         {
             var mailMessage = new MailMessage
             {
-                From = new MailAddress(email.From),
-                Subject = email.Subject,
-                Body = email.Body,
+                From = new MailAddress(emailMessage.From),
+                Subject = emailMessage.Subject,
+                Body = emailMessage.Body,
                 BodyEncoding = Encoding.UTF8,
                 SubjectEncoding = Encoding.UTF8,
-                IsBodyHtml = email.IsBodyHtml
+                IsBodyHtml = emailMessage.IsBodyHtml
             };
 
-            foreach (var recipient in email.Tos)
+            foreach (var recipient in emailMessage.To)
             {
                 mailMessage.To.Add(recipient);
             }
@@ -53,10 +53,10 @@ namespace Serilog.Sinks.Email
 
         public void Dispose()
         {
-            _smtpClient?.Dispose();
+            _smtpClient.Dispose();
         }
 
-        private SmtpClient CreateSmtpClient(EmailConnectionInfo connectionInfo)
+        SmtpClient CreateSmtpClient(EmailConnectionInfo connectionInfo)
         {
             var smtpClient = new SmtpClient();
             if (!string.IsNullOrWhiteSpace(connectionInfo.MailServer))
@@ -83,7 +83,7 @@ namespace Serilog.Sinks.Email
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private static void SendCompletedCallback(object sender, AsyncCompletedEventArgs e)
+        static void SendCompletedCallback(object sender, AsyncCompletedEventArgs e)
         {
             if (e.Cancelled)
             {

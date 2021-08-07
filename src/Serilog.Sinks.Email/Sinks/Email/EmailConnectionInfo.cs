@@ -14,9 +14,6 @@
 
 using System.ComponentModel;
 using System.Net;
-#if MAIL_KIT
-using Serilog.Sinks.Email;
-#endif
 
 namespace Serilog.Sinks.Email
 {

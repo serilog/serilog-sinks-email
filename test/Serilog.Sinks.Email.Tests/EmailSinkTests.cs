@@ -56,13 +56,15 @@ namespace Serilog.Sinks.Email.Tests
 
             Assert.Equal(Enumerable.Empty<string>(), selfLogMessages);
         }
+
         [Fact]
-        public void EmailTransportIsCreatedWhenEmailSinkIsContructed()
+        public void EmailTransportIsCreatedWhenEmailSinkIsConstructed()
         {
             var (emailConnectionInfoMock, emailTransportMock) = CreateEmailTransportConnectionInfoMocks();
-            var emailSink = CreateDefaultEmailSink(emailConnectionInfoMock.Object);
+            CreateDefaultEmailSink(emailConnectionInfoMock.Object);
 
             emailConnectionInfoMock.Verify(eci => eci.CreateEmailTransport(), Times.Once);
+            emailTransportMock.Verify(eci => eci.Dispose(), Times.Never);
         }
 
         [Fact]
@@ -77,9 +79,10 @@ namespace Serilog.Sinks.Email.Tests
         }
 
         [Fact]
+        [UseCulture("en-us")]
         public async Task SendEmailIsCorrectlyCalledWhenEventAreLogged()
         {
-            Sinks.Email.Email actual = null;
+            EmailMessage actual = null;
             var (emailConnectionInfoMock, emailTransportMock) =
                 CreateEmailTransportConnectionInfoMocks(email => actual = email);
             var emailConnectionInfo = emailConnectionInfoMock.Object;
@@ -102,20 +105,28 @@ namespace Serilog.Sinks.Email.Tests
                     , Enumerable.Empty<LogEventProperty>())});
             emailSink.Dispose();
 
-            emailTransportMock.Verify(et => et.SendMailAsync(It.IsAny<Sinks.Email.Email>()), Times.Once);
+            emailTransportMock.Verify(et => et.SendMailAsync(It.IsAny<EmailMessage>()), Times.Once);
 
             Assert.Equal("[Error] A multiline" + Environment.NewLine
                         + "Message" + Environment.NewLine
-                        + "System.ArgumentOutOfRangeException: Message of the exception" + Environment.NewLine
-                        + "Parameter name: parameter1" + Environment.NewLine
-                        + "", actual.Body);
+                        + "System.ArgumentOutOfRangeException: Message of the exception"
+#if NEW_ARGUMENTOUTOFRANGEEXCEPTION_MESSAGE
+                        + " (Parameter 'parameter1')"
+#else
+                        + Environment.NewLine + "Parameter name: parameter1"
+#endif
+                        + Environment.NewLine + "", actual.Body);
             Assert.Equal(@"[Error] A multiline" + Environment.NewLine
                         + "Message" + Environment.NewLine
-                        + "System.ArgumentOutOfRangeException: Message of the exception" + Environment.NewLine
-                        + "Parameter name: parameter1" + Environment.NewLine
-                        + "", actual.Subject);
+                        + "System.ArgumentOutOfRangeException: Message of the exception"
+#if NEW_ARGUMENTOUTOFRANGEEXCEPTION_MESSAGE
+                        + " (Parameter 'parameter1')"
+#else
+                        + Environment.NewLine + "Parameter name: parameter1"
+#endif
+                        + Environment.NewLine + "", actual.Subject);
             Assert.Equal("from@localhost.local", actual.From);
-            Assert.Equal(new[] { "to@localhost.local" }, actual.Tos);
+            Assert.Equal(new[] { "to@localhost.local" }, actual.To);
             Assert.True(actual.IsBodyHtml);
         }
 
@@ -134,15 +145,15 @@ namespace Serilog.Sinks.Email.Tests
         private (Mock<EmailConnectionInfo> EmailConnectionInfoMock, Mock<IEmailTransport> EmailTransportMock)
             CreateEmailTransportConnectionInfoMocks()
         {
-            return CreateEmailTransportConnectionInfoMocks(email => { });
+            return CreateEmailTransportConnectionInfoMocks(_ => { });
         }
 
         private (Mock<EmailConnectionInfo> EmailConnectionInfoMock, Mock<IEmailTransport> EmailTransportMock)
-            CreateEmailTransportConnectionInfoMocks(Action<Sinks.Email.Email> emailSend)
+            CreateEmailTransportConnectionInfoMocks(Action<EmailMessage> emailSend)
         {
             var emailTransportMock = new Mock<IEmailTransport>();
-            emailTransportMock.Setup(et => et.SendMailAsync(It.IsAny<Sinks.Email.Email>()))
-                .Callback<Sinks.Email.Email>(email => emailSend(email))
+            emailTransportMock.Setup(et => et.SendMailAsync(It.IsAny<EmailMessage>()))
+                .Callback<EmailMessage>(email => emailSend(email))
                 .Returns(Task.Factory.StartNew(() => { }));
             var emailTransport = emailTransportMock.Object;
             var emailConnectionInfoMock = new Mock<EmailConnectionInfo>();

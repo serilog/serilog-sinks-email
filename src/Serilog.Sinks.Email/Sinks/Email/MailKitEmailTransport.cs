@@ -24,30 +24,30 @@ namespace Serilog.Sinks.Email
 {
     class MailKitEmailTransport: IEmailTransport
     {
-        private readonly EmailConnectionInfo _connectionInfo;
+        readonly EmailConnectionInfo _connectionInfo;
 
         public MailKitEmailTransport(EmailConnectionInfo connectionInfo)
         {
             _connectionInfo = connectionInfo;
         }
 
-        public async Task SendMailAsync(Sinks.Email.Email email)
+        public async Task SendMailAsync(EmailMessage emailMessage)
         {
-            var fromAddress = MailboxAddress.Parse(email.From);
+            var fromAddress = MailboxAddress.Parse(emailMessage.From);
             var mimeMessage = new MimeMessage();
             mimeMessage.From.Add(fromAddress);
-            mimeMessage.To.AddRange(email.Tos.Select(MailboxAddress.Parse));
-            mimeMessage.Subject = email.Subject;
+            mimeMessage.To.AddRange(emailMessage.To.Select(MailboxAddress.Parse));
+            mimeMessage.Subject = emailMessage.Subject;
             mimeMessage.Body = _connectionInfo.IsBodyHtml
-                ? new BodyBuilder { HtmlBody = email.Body }.ToMessageBody()
-                : new BodyBuilder { TextBody = email.Body }.ToMessageBody();
+                ? new BodyBuilder { HtmlBody = emailMessage.Body }.ToMessageBody()
+                : new BodyBuilder { TextBody = emailMessage.Body }.ToMessageBody();
             using (var smtpClient = OpenConnectedSmtpClient())
             {
                 await smtpClient.SendAsync(mimeMessage);
                 await smtpClient.DisconnectAsync(quit: true);
             }
         }
-        private SmtpClient OpenConnectedSmtpClient()
+        SmtpClient OpenConnectedSmtpClient()
         {
             var smtpClient = new SmtpClient();
             if (!string.IsNullOrWhiteSpace(_connectionInfo.MailServer))

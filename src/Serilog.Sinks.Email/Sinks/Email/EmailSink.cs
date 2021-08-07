@@ -25,6 +25,7 @@ namespace Serilog.Sinks.Email
 {
     class EmailSink : IBatchedLogEventSink, IDisposable
     {
+        private static readonly char[] MailAddressesSplitCharacters = { ';', ',' };
         readonly EmailConnectionInfo _connectionInfo;
         readonly IEmailTransport _emailTransport;
 
@@ -43,7 +44,8 @@ namespace Serilog.Sinks.Email
         {
             if (connectionInfo == null) throw new ArgumentNullException(nameof(connectionInfo));
 
-            _connectionInfo = connectionInfo; _emailTransport = _connectionInfo.CreateEmailTransport();
+            _connectionInfo = connectionInfo;
+            _emailTransport = _connectionInfo.CreateEmailTransport();
             _textFormatter = textFormatter;
             _subjectLineFormatter = subjectLineFormatter;
         }
@@ -69,14 +71,12 @@ namespace Serilog.Sinks.Email
             var subject = new StringWriter();
             _subjectLineFormatter.Format(events.OrderByDescending(e => e.Level).First(), subject);
 
-            var email = new Sinks.Email.Email
-            {
-                From = _connectionInfo.FromEmail,
-                Subject = subject.ToString(),
-                Body = payload.ToString(),
-                IsBodyHtml = _connectionInfo.IsBodyHtml,
-                Tos = _connectionInfo.ToEmail.Split(";".ToCharArray(), StringSplitOptions.RemoveEmptyEntries)
-            };
+            var email = new EmailMessage(
+                _connectionInfo.FromEmail,
+                _connectionInfo.ToEmail.Split(MailAddressesSplitCharacters, StringSplitOptions.RemoveEmptyEntries),
+                subject.ToString(),
+                payload.ToString(),
+                _connectionInfo.IsBodyHtml);
 
             await _emailTransport.SendMailAsync(email);
         }
@@ -88,7 +88,7 @@ namespace Serilog.Sinks.Email
 
         public void Dispose()
         {
-            _emailTransport?.Dispose();
+            _emailTransport.Dispose();
         }
     }
 }

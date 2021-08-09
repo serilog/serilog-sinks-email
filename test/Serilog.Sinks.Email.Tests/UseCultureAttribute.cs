@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Globalization;
 using System.Reflection;
 using System.Threading;
@@ -6,6 +6,8 @@ using Xunit.Sdk;
 
 namespace Serilog.Sinks.Email.Tests
 {
+    // This class courtesy of the xUnit samples at https://github.com/xunit/samples.xunit/blob/main/UseCulture/UseCultureAttribute.cs
+
     /// <summary>
     /// Apply this attribute to your test method to replace the
     /// <see cref="Thread.CurrentThread" /> <see cref="CultureInfo.CurrentCulture" /> and

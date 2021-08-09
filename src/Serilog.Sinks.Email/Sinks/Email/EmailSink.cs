@@ -12,28 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if SYSTEM_NET
-
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.Mail;
-using System.Text;
 using System.Threading.Tasks;
-using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.PeriodicBatching;
-using Serilog.Formatting.Display;
 using System.Linq;
 
 namespace Serilog.Sinks.Email
 {
     class EmailSink : IBatchedLogEventSink, IDisposable
     {
+        private static readonly char[] MailAddressesSplitCharacters = { ';', ',' };
         readonly EmailConnectionInfo _connectionInfo;
-
-        readonly SmtpClient _smtpClient;
+        readonly IEmailTransport _emailTransport;
 
         readonly ITextFormatter _textFormatter;
 
@@ -51,38 +45,11 @@ namespace Serilog.Sinks.Email
             if (connectionInfo == null) throw new ArgumentNullException(nameof(connectionInfo));
 
             _connectionInfo = connectionInfo;
+            _emailTransport = _connectionInfo.CreateEmailTransport();
             _textFormatter = textFormatter;
             _subjectLineFormatter = subjectLineFormatter;
-            _smtpClient = CreateSmtpClient();
-            _smtpClient.SendCompleted += SendCompletedCallback;
         }
-
-        /// <summary>
-        /// Reports if there is an error in sending an email
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        static void SendCompletedCallback(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
-        {
-            if (e.Cancelled)
-            {
-                SelfLog.WriteLine("Received failed result {0}: {1}", "Cancelled", e.Error);
-            }
-            if (e.Error != null)
-            {
-                SelfLog.WriteLine("Received failed result {0}: {1}", "Error", e.Error);
-            }
-        }
-
-
-        /// <summary>
-        /// Free resources held by the sink.
-        /// </summary>
-        public void Dispose()
-        {
-            _smtpClient.Dispose();
-        }
-
+        
         /// <summary>
         /// Emit a batch of log events, running asynchronously.
         /// </summary>
@@ -104,22 +71,14 @@ namespace Serilog.Sinks.Email
             var subject = new StringWriter();
             _subjectLineFormatter.Format(events.OrderByDescending(e => e.Level).First(), subject);
 
-            var mailMessage = new MailMessage
-            {
-                From = new MailAddress(_connectionInfo.FromEmail),
-                Subject = subject.ToString(),
-                Body = payload.ToString(),
-                BodyEncoding = Encoding.UTF8,
-                SubjectEncoding = Encoding.UTF8,
-                IsBodyHtml = _connectionInfo.IsBodyHtml
-            };
+            var email = new EmailMessage(
+                _connectionInfo.FromEmail,
+                _connectionInfo.ToEmail.Split(MailAddressesSplitCharacters, StringSplitOptions.RemoveEmptyEntries),
+                subject.ToString(),
+                payload.ToString(),
+                _connectionInfo.IsBodyHtml);
 
-            foreach (var recipient in _connectionInfo.ToEmail.Split(",;".ToCharArray(), StringSplitOptions.RemoveEmptyEntries))
-            {
-                mailMessage.To.Add(recipient);
-            }
-
-            await _smtpClient.SendMailAsync(mailMessage);
+            await _emailTransport.SendMailAsync(email);
         }
 
         public Task OnEmptyBatchAsync()
@@ -127,23 +86,9 @@ namespace Serilog.Sinks.Email
             return Task.FromResult(false);
         }
 
-        private SmtpClient CreateSmtpClient()
+        public void Dispose()
         {
-            var smtpClient = new SmtpClient();
-            if (!string.IsNullOrWhiteSpace(_connectionInfo.MailServer))
-            {
-                if (_connectionInfo.NetworkCredentials == null)
-                    smtpClient.UseDefaultCredentials = true;
-                else
-                    smtpClient.Credentials = _connectionInfo.NetworkCredentials;
-
-                smtpClient.Host = _connectionInfo.MailServer;
-                smtpClient.Port = _connectionInfo.Port;
-                smtpClient.EnableSsl = _connectionInfo.EnableSsl;
-            }
-
-            return smtpClient;
+            _emailTransport.Dispose();
         }
     }
 }
-#endif

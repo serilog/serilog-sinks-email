@@ -14,9 +14,6 @@
 
 using System.ComponentModel;
 using System.Net;
-#if MAIL_KIT
-using Serilog.Sinks.Email;
-#endif
 
 namespace Serilog.Sinks.Email
 {
@@ -104,6 +101,17 @@ namespace Serilog.Sinks.Email
         /// Set secure socket option
         /// </summary>
         public SecureSocketOptions? SecureSocketOption { get; set; }
+
 #endif
+
+        internal virtual IEmailTransport CreateEmailTransport()
+        {
+#if SYSTEM_NET
+            return new SystemMailEmailTransport(this);
+#endif
+#if MAIL_KIT
+            return new MailKitEmailTransport(this);
+#endif
+        }
     }
 }

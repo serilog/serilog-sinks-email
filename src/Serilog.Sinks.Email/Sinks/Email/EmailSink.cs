@@ -68,8 +68,7 @@ namespace Serilog.Sinks.Email
                 _textFormatter.Format(logEvent, payload);
             }
 
-            var subject = new StringWriter();
-            _subjectLineFormatter.Format(events.OrderByDescending(e => e.Level).First(), subject);
+            var subject = ComputeMailSubject(_subjectLineFormatter, events);
 
             var email = new EmailMessage(
                 _connectionInfo.FromEmail,
@@ -79,6 +78,16 @@ namespace Serilog.Sinks.Email
                 _connectionInfo.IsBodyHtml);
 
             await _emailTransport.SendMailAsync(email);
+        }
+
+        public static string ComputeMailSubject(ITextFormatter subjectLineFormatter, IEnumerable<LogEvent> events)
+        {
+            var subject = new StringWriter();
+            subjectLineFormatter.Format(events.OrderByDescending(e => e.Level).First(), subject);
+            var subjectAsText = subject.ToString();
+            var firstLineOfSubject = subjectAsText.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
+                                         .FirstOrDefault() ?? string.Empty;
+            return firstLineOfSubject;
         }
 
         public Task OnEmptyBatchAsync()

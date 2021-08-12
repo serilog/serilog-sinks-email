@@ -130,6 +130,23 @@ namespace Serilog.Sinks.Email.Tests
             Assert.True(actual.IsBodyHtml);
         }
 
+        [Fact]
+        public void MultilineMessageCreatesSubjectWithTheFirstLineOnly()
+        {
+            var subjectLineFormatter = new MessageTemplateTextFormatter("{Message}", null);
+
+            var logEvents = new[]
+            {
+                new LogEvent(DateTimeOffset.Now, LogEventLevel.Error, new Exception("An exception occured"),
+                    new MessageTemplate(@"Subject",
+                        new MessageTemplateToken[]{new PropertyToken("Message", "A multiline" + Environment.NewLine + "Message")})
+                    , Enumerable.Empty<LogEventProperty>())
+            };
+            var mailSubject = EmailSink.ComputeMailSubject(subjectLineFormatter, logEvents);
+
+            Assert.Equal("A multiline", mailSubject);
+        }
+
         private EmailSink CreateDefaultEmailSink(EmailConnectionInfo emailConnectionInfo)
         {
             var formatter = new MessageTemplateTextFormatter("[{Level}] {Message}{NewLine}{Exception}", null);

@@ -110,7 +110,7 @@ namespace Serilog.Sinks.Email.Tests
             Assert.Equal("[Error] A multiline" + Environment.NewLine
                         + "Message" + Environment.NewLine
                         + "System.ArgumentOutOfRangeException: Message of the exception"
-#if NEW_ARGUMENTOUTOFRANGEEXCEPTION_MESSAGE
+#if NETCOREAPP3_1_OR_GREATER
                         + " (Parameter 'parameter1')"
 #else
                         + Environment.NewLine + "Parameter name: parameter1"
@@ -119,7 +119,7 @@ namespace Serilog.Sinks.Email.Tests
             Assert.Equal(@"[Error] A multiline" + Environment.NewLine
                         + "Message" + Environment.NewLine
                         + "System.ArgumentOutOfRangeException: Message of the exception"
-#if NEW_ARGUMENTOUTOFRANGEEXCEPTION_MESSAGE
+#if NETCOREAPP3_1_OR_GREATER
                         + " (Parameter 'parameter1')"
 #else
                         + Environment.NewLine + "Parameter name: parameter1"

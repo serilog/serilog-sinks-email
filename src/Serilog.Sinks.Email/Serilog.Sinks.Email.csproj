@@ -34,7 +34,7 @@
     <Reference Include="System.Net" />
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>  
+  </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net47' ">
     <Reference Include="System.Net" />
     <Reference Include="System" />
@@ -43,7 +43,7 @@
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <DefineConstants>$(DefineConstants);SYSTEM_NET</DefineConstants>
-  </PropertyGroup>  
+  </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net47' ">
     <DefineConstants>$(DefineConstants);SYSTEM_NET</DefineConstants>
   </PropertyGroup>
@@ -56,7 +56,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.1' ">
     <DefineConstants>$(DefineConstants);MAIL_KIT</DefineConstants>
-  </PropertyGroup>  
+  </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
     <PackageReference Include="MailKit" Version="2.6.0" />
@@ -78,8 +78,8 @@
   <ItemGroup>
     <None Include="..\..\serilog-sink-nuget.png">
       <Pack>True</Pack>
-      <PackagePath></PackagePath>
+      <PackagePath />
     </None>
-  </ItemGroup>  
+  </ItemGroup>
 
 </Project>

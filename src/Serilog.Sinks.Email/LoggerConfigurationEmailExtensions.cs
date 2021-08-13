@@ -241,7 +241,7 @@ namespace Serilog
         /// </summary>
         /// <param name="loggerConfiguration">The logger configuration.</param>
         /// <param name="connectionInfo">The connection info used for</param>
-        /// <param name="textFormatter">ITextFormatter implementation to write log entry to email.</param>
+        /// <param name="textFormatter">The <see cref="ITextFormatter"/> or <see cref="IBatchTextFormatter"/> implementation to write log entries to email.</param>
         /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
         /// <param name="batchPostingLimit">The maximum number of events to post in a single batch.</param>
         /// <param name="period">The time to wait between checking for event batches.</param>

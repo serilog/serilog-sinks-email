@@ -5,6 +5,7 @@ using Serilog.Formatting.Display;
 using Serilog.Parsing;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -128,6 +129,45 @@ namespace Serilog.Sinks.Email.Tests
             Assert.Equal("from@localhost.local", actual.From);
             Assert.Equal(new[] { "to@localhost.local" }, actual.To);
             Assert.True(actual.IsBodyHtml);
+        }
+
+        [Fact]
+        public void WorksWithIBatchTextFormatter()
+        {
+            var body = "SendMailAsync was not called";
+            var selfLogMessages = new List<string>();
+            SelfLog.Enable(selfLogMessages.Add);
+
+            var emailConnectionInfo = new Mock<EmailConnectionInfo>();
+            emailConnectionInfo.Object.ToEmail = "to@example.com";
+            var emailTransport = new Mock<IEmailTransport>();
+            emailTransport.Setup(x => x.SendMailAsync(It.IsAny<EmailMessage>())).Callback<EmailMessage>(m => body = m.Body).Returns(Task.FromResult(false));
+            emailConnectionInfo.Setup(x => x.CreateEmailTransport()).Returns(emailTransport.Object);
+            using (var emailLogger = new LoggerConfiguration()
+                .WriteTo.Email(emailConnectionInfo.Object, new BatchFormatter())
+                .CreateLogger())
+            {
+                emailLogger.Information("log1");
+                emailLogger.Information("log2");
+                emailLogger.Information("log3");
+            }
+
+            Assert.Empty(selfLogMessages);
+            Assert.Equal("<table><tr>log1</tr><tr>log2</tr><tr>log3</tr></table>", body);
+        }
+
+        private class BatchFormatter : IBatchTextFormatter
+        {
+            public void Format(LogEvent logEvent, TextWriter output)
+            {
+                output.Write("<tr>");
+                logEvent.RenderMessage(output);
+                output.Write("</tr>");
+            }
+
+            public void WriteHeader(TextWriter output) => output.Write("<table>");
+
+            public void WriteFooter(TextWriter output) => output.Write("</table>");
         }
 
         private EmailSink CreateDefaultEmailSink(EmailConnectionInfo emailConnectionInfo)

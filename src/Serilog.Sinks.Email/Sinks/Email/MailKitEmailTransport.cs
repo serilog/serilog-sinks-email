@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if MAIL_KIT
-
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -77,4 +75,3 @@ namespace Serilog.Sinks.Email
         }
     }
 }
-#endif

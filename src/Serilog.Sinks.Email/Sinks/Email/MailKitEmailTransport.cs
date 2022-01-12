@@ -57,9 +57,18 @@ namespace Serilog.Sinks.Email
                     smtpClient.ServerCertificateValidationCallback += _connectionInfo.ServerCertificateValidationCallback;
                 }
 
-                smtpClient.Connect(
-                    _connectionInfo.MailServer, _connectionInfo.Port,
-                    useSsl: _connectionInfo.EnableSsl);
+                if (_connectionInfo.EnableSsl)
+                {
+                    smtpClient.Connect(
+                        _connectionInfo.MailServer, _connectionInfo.Port,
+                        useSsl: _connectionInfo.EnableSsl);
+                }
+                else
+                {
+                    smtpClient.Connect(
+                        _connectionInfo.MailServer, _connectionInfo.Port,
+                        options: SecureSocketOptions.None);
+                }
 
                 if (_connectionInfo.NetworkCredentials != null)
                 {

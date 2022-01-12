@@ -18,7 +18,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MailKit.Net.Smtp;
-using MailKit.Security;
 using MimeKit;
 
 namespace Serilog.Sinks.Email
@@ -68,7 +67,7 @@ namespace Serilog.Sinks.Email
                 {
                     smtpClient.Connect(
                         _connectionInfo.MailServer, _connectionInfo.Port,
-                        options: SecureSocketOptions.None);
+                        options: MailKit.Security.SecureSocketOptions.None);
                 }
 
                 if (_connectionInfo.NetworkCredentials != null)

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Serilog.Formatting;
 using Xunit;
 
 namespace Serilog.Sinks.Email.Tests
@@ -144,7 +145,7 @@ namespace Serilog.Sinks.Email.Tests
             emailTransport.Setup(x => x.SendMailAsync(It.IsAny<EmailMessage>())).Callback<EmailMessage>(m => body = m.Body).Returns(Task.FromResult(false));
             emailConnectionInfo.Setup(x => x.CreateEmailTransport()).Returns(emailTransport.Object);
             using (var emailLogger = new LoggerConfiguration()
-                .WriteTo.Email(emailConnectionInfo.Object, new BatchFormatter())
+                .WriteTo.Email(emailConnectionInfo.Object, new HtmlTableFormatter())
                 .CreateLogger())
             {
                 emailLogger.Information("log1");
@@ -156,16 +157,16 @@ namespace Serilog.Sinks.Email.Tests
             Assert.Equal("<table><tr>log1</tr><tr>log2</tr><tr>log3</tr></table>", body);
         }
 
-        private class BatchFormatter : IBatchTextFormatter
+        private class HtmlTableFormatter : ITextFormatter, IBatchTextFormatter
         {
+            public void WriteHeader(TextWriter output) => output.Write("<table>");
+
             public void Format(LogEvent logEvent, TextWriter output)
             {
                 output.Write("<tr>");
                 logEvent.RenderMessage(output);
                 output.Write("</tr>");
             }
-
-            public void WriteHeader(TextWriter output) => output.Write("<table>");
 
             public void WriteFooter(TextWriter output) => output.Write("</table>");
         }

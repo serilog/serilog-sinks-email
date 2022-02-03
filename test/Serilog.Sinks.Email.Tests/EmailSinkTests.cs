@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Serilog.Formatting;
 using Xunit;
@@ -148,27 +149,35 @@ namespace Serilog.Sinks.Email.Tests
                 .WriteTo.Email(emailConnectionInfo.Object, new HtmlTableFormatter())
                 .CreateLogger())
             {
-                emailLogger.Information("log1");
-                emailLogger.Information("log2");
-                emailLogger.Information("log3");
+                emailLogger.Information("Information");
+                emailLogger.Warning("Warning");
+                emailLogger.Error("<Error>");
             }
 
             Assert.Empty(selfLogMessages);
-            Assert.Equal("<table><tr>log1</tr><tr>log2</tr><tr>log3</tr></table>", body);
+            Assert.Equal("<table><tr>Information</tr><tr>Warning</tr><tr>&lt;Error&gt;</tr></table>", body);
         }
 
-        private class HtmlTableFormatter : ITextFormatter, IBatchTextFormatter
+        private class HtmlTableFormatter : IBatchTextFormatter
         {
-            public void WriteHeader(TextWriter output) => output.Write("<table>");
+            public void FormatBatch(IEnumerable<LogEvent> logEvents, TextWriter output)
+            {
+                output.Write("<table>");
+                foreach (var logEvent in logEvents)
+                {
+                    Format(logEvent, output);
+                }
+                output.Write("</table>");
+            }
 
             public void Format(LogEvent logEvent, TextWriter output)
             {
                 output.Write("<tr>");
-                logEvent.RenderMessage(output);
+                using var buffer = new StringWriter();
+                logEvent.RenderMessage(buffer);
+                output.Write(WebUtility.HtmlEncode(buffer.ToString()));
                 output.Write("</tr>");
             }
-
-            public void WriteFooter(TextWriter output) => output.Write("</table>");
         }
 
         private EmailSink CreateDefaultEmailSink(EmailConnectionInfo emailConnectionInfo)

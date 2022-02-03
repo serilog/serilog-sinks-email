@@ -63,13 +63,17 @@ namespace Serilog.Sinks.Email
 
             var payload = new StringWriter();
 
-            var batchTextFormatter = _textFormatter as IBatchTextFormatter;
-            batchTextFormatter?.WriteHeader(payload);
-            foreach (var logEvent in events)
+            if (_textFormatter is IBatchTextFormatter batchTextFormatter)
             {
-                _textFormatter.Format(logEvent, payload);
+                batchTextFormatter.FormatBatch(events, payload);
             }
-            batchTextFormatter?.WriteFooter(payload);
+            else
+            {
+                foreach (var logEvent in events)
+                {
+                    _textFormatter.Format(logEvent, payload);
+                }
+            }
 
             var subject = new StringWriter();
             _subjectLineFormatter.Format(events.OrderByDescending(e => e.Level).First(), subject);

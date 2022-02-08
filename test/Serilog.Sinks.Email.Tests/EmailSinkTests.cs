@@ -5,8 +5,11 @@ using Serilog.Formatting.Display;
 using Serilog.Parsing;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
+using Serilog.Formatting;
 using Xunit;
 
 namespace Serilog.Sinks.Email.Tests
@@ -128,6 +131,53 @@ namespace Serilog.Sinks.Email.Tests
             Assert.Equal("from@localhost.local", actual.From);
             Assert.Equal(new[] { "to@localhost.local" }, actual.To);
             Assert.True(actual.IsBodyHtml);
+        }
+
+        [Fact]
+        public void WorksWithIBatchTextFormatter()
+        {
+            var body = "SendMailAsync was not called";
+            var selfLogMessages = new List<string>();
+            SelfLog.Enable(selfLogMessages.Add);
+
+            var emailConnectionInfo = new Mock<EmailConnectionInfo>();
+            emailConnectionInfo.Object.ToEmail = "to@example.com";
+            var emailTransport = new Mock<IEmailTransport>();
+            emailTransport.Setup(x => x.SendMailAsync(It.IsAny<EmailMessage>())).Callback<EmailMessage>(m => body = m.Body).Returns(Task.FromResult(false));
+            emailConnectionInfo.Setup(x => x.CreateEmailTransport()).Returns(emailTransport.Object);
+            using (var emailLogger = new LoggerConfiguration()
+                .WriteTo.Email(emailConnectionInfo.Object, new HtmlTableFormatter())
+                .CreateLogger())
+            {
+                emailLogger.Information("Information");
+                emailLogger.Warning("Warning");
+                emailLogger.Error("<Error>");
+            }
+
+            Assert.Empty(selfLogMessages);
+            Assert.Equal("<table><tr>Information</tr><tr>Warning</tr><tr>&lt;Error&gt;</tr></table>", body);
+        }
+
+        private class HtmlTableFormatter : IBatchTextFormatter
+        {
+            public void FormatBatch(IEnumerable<LogEvent> logEvents, TextWriter output)
+            {
+                output.Write("<table>");
+                foreach (var logEvent in logEvents)
+                {
+                    Format(logEvent, output);
+                }
+                output.Write("</table>");
+            }
+
+            public void Format(LogEvent logEvent, TextWriter output)
+            {
+                output.Write("<tr>");
+                using var buffer = new StringWriter();
+                logEvent.RenderMessage(buffer);
+                output.Write(WebUtility.HtmlEncode(buffer.ToString()));
+                output.Write("</tr>");
+            }
         }
 
         private EmailSink CreateDefaultEmailSink(EmailConnectionInfo emailConnectionInfo)

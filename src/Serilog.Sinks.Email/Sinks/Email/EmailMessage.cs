@@ -2,7 +2,7 @@
 
 namespace Serilog.Sinks.Email
 {
-    internal class EmailMessage
+    public class EmailMessage
     {
         public EmailMessage(string from, IEnumerable<string> to, string subject, string body, bool isBodyHtml)
         {

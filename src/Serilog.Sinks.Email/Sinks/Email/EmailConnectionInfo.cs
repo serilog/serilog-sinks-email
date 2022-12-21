@@ -20,7 +20,7 @@ namespace Serilog.Sinks.Email
     /// <summary>
     /// Connection information for use by the Email sink.
     /// </summary>
-    public class EmailConnectionInfo
+    public class EmailConnectionInfo : IEmailConnectionInfo
     {
         /// <summary>
         /// The default port used by for SMTP transfer.
@@ -104,7 +104,7 @@ namespace Serilog.Sinks.Email
 
 #endif
 
-        internal virtual IEmailTransport CreateEmailTransport()
+        public virtual IEmailTransport CreateEmailTransport()
         {
 #if SYSTEM_NET
             return new SystemMailEmailTransport(this);

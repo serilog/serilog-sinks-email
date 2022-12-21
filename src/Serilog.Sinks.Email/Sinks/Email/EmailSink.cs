@@ -26,7 +26,7 @@ namespace Serilog.Sinks.Email
     class EmailSink : IBatchedLogEventSink, IDisposable
     {
         private static readonly char[] MailAddressesSplitCharacters = { ';', ',' };
-        readonly EmailConnectionInfo _connectionInfo;
+        readonly IEmailConnectionInfo _connectionInfo;
         readonly IEmailTransport _emailTransport;
 
         readonly ITextFormatter _textFormatter;
@@ -40,7 +40,7 @@ namespace Serilog.Sinks.Email
         /// <param name="textFormatter">Supplies culture-specific formatting information, or null.</param>
         /// <param name="subjectLineFormatter">Supplies culture-specific formatting information, or null.</param>
         /// <exception cref="System.ArgumentNullException">connectionInfo</exception>
-        public EmailSink(EmailConnectionInfo connectionInfo, ITextFormatter textFormatter, ITextFormatter subjectLineFormatter)
+        public EmailSink(IEmailConnectionInfo connectionInfo, ITextFormatter textFormatter, ITextFormatter subjectLineFormatter)
         {
             if (connectionInfo == null) throw new ArgumentNullException(nameof(connectionInfo));
 

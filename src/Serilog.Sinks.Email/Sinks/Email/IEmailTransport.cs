@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace Serilog.Sinks.Email
 {
-    interface IEmailTransport : IDisposable
+    public interface IEmailTransport : IDisposable
     {
         Task SendMailAsync(EmailMessage emailMessage);
     }

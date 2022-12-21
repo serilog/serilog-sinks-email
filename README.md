@@ -1,4 +1,4 @@
-# Serilog.Sinks.Email
+﻿# Serilog.Sinks.Email
 
 [![Build status](https://ci.appveyor.com/api/projects/status/sfvp7dw8u6aiodj1/branch/master?svg=true)](https://ci.appveyor.com/project/serilog/serilog-sinks-email/branch/master)
 
@@ -17,3 +17,15 @@ var log = new LoggerConfiguration()
 ```
 
 An overload accepting `EmailConnectionInfo` can be used to specify advanced options.
+
+Other types of email transport can be also used like SqlServer sp_send_dbmail
+```csharp
+var log = new LoggerConfiguration()
+    .WriteTo.Email(ńew SqlServerEmailConnectionInfo
+    {
+        ToEmail = "support@example.com",
+        MailProfileName = "My_Profile",
+        SqlConnectionString = "Data Source=(local);Integrated Security=True"
+    })
+    .CreateLogger();
+```

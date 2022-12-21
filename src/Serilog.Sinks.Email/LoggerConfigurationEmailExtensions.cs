@@ -205,7 +205,7 @@ namespace Serilog
         /// <exception cref="System.ArgumentNullException">connectionInfo</exception>
         public static LoggerConfiguration Email(
             this LoggerSinkConfiguration loggerConfiguration,
-            EmailConnectionInfo connectionInfo,
+            IEmailConnectionInfo connectionInfo,
             string outputTemplate = DefaultOutputTemplate,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             int batchPostingLimit = DefaultBatchPostingLimit,

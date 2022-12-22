@@ -34,17 +34,10 @@ You can also use appsettings.json when Serilog.Configuration is used combined wi
 ```json
  "Serilog": {
         "Using": [ "Serilog" ],
+        "MinimumLevel": "Error",
         "WriteTo": [
             {
                 "Name": "Email",
-                "Filter": [
-                    {
-                        "Name": "ByExcluding",
-                        "Args": {
-                            "expression": "@Level <> Error"
-                        }
-                    }
-                ],
                 "Args": {
                     "sqlConnectionString": "Data Source=(local);...",
                     "mailProfileName": "My_Profile",

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.ComponentModel;
 using System.Net;
 
@@ -112,6 +113,7 @@ namespace Serilog.Sinks.Email
 #if MAIL_KIT
             return new MailKitEmailTransport(this);
 #endif
+			throw new NotImplementedException();
         }
     }
 }

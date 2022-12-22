@@ -2,6 +2,7 @@ using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
 
 namespace Serilog.Sinks.Email;
 
@@ -18,7 +19,14 @@ class SqlServerEmailTransport : IEmailTransport
             throw new ArgumentException("Value cannot be null or empty.", nameof(sqlConnectionString));
 
         _profileName = profileName;
-        _sqlConnection = new Lazy<SqlConnection>(() => new SqlConnection(sqlConnectionString));
+        _sqlConnection = new Lazy<SqlConnection>(() => GetSqlConnection(sqlConnectionString));
+    }
+
+    private static SqlConnection GetSqlConnection(string sqlConnectionString)
+    {
+	    var sqlConnection = new SqlConnection(sqlConnectionString);
+        sqlConnection.Open();
+	    return sqlConnection;
     }
 
     public void Dispose()
@@ -37,8 +45,12 @@ class SqlServerEmailTransport : IEmailTransport
         };
 
         sqlCommand.Parameters.AddWithValue("profile_name", _profileName);
-        sqlCommand.Parameters.AddWithValue("from_address", emailMessage.From);
-        sqlCommand.Parameters.AddWithValue("recipients", emailMessage.To);
+        if (!string.IsNullOrEmpty(emailMessage.From))
+        {
+	        sqlCommand.Parameters.AddWithValue("from_address", emailMessage.From);
+        }
+
+        sqlCommand.Parameters.AddWithValue("recipients", string.Join(";", emailMessage.To));
         sqlCommand.Parameters.AddWithValue("subject", emailMessage.Subject);
         sqlCommand.Parameters.AddWithValue("body", emailMessage.Body);
         sqlCommand.Parameters.AddWithValue("body_format", emailMessage.IsBodyHtml ? "HTML" : "TEXT");

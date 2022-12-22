@@ -49,7 +49,7 @@ You can also use appsettings.json when Serilog.Configuration is used combined wi
                     "sqlConnectionString": "Data Source=(local);...",
                     "mailProfileName": "My_Profile",
                     "toEmail": "support@example.com",
-                    "emailSubject": "Exception on PROD"
+                    "mailSubject": "Exception on PROD"
                 }
             }
         ]

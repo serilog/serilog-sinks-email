@@ -3,57 +3,58 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
 
-namespace Serilog.Sinks.Email;
-
-class SqlServerEmailTransport : IEmailTransport
+namespace Serilog.Sinks.Email
 {
-    private readonly string _profileName;
-    private readonly Lazy<SqlConnection> _sqlConnection;
-
-    public SqlServerEmailTransport(string profileName, string sqlConnectionString)
+    class SqlServerEmailTransport : IEmailTransport
     {
-        if (string.IsNullOrEmpty(profileName))
-            throw new ArgumentException("Value cannot be null or empty.", nameof(profileName));
-        if (string.IsNullOrEmpty(sqlConnectionString))
-            throw new ArgumentException("Value cannot be null or empty.", nameof(sqlConnectionString));
+        private readonly string _profileName;
+        private readonly Lazy<SqlConnection> _sqlConnection;
 
-        _profileName = profileName;
-        _sqlConnection = new Lazy<SqlConnection>(() => GetSqlConnection(sqlConnectionString));
-    }
-
-    private static SqlConnection GetSqlConnection(string sqlConnectionString)
-    {
-	    var sqlConnection = new SqlConnection(sqlConnectionString);
-        sqlConnection.Open();
-	    return sqlConnection;
-    }
-
-    public void Dispose()
-    {
-        if (_sqlConnection.IsValueCreated)
+        public SqlServerEmailTransport(string profileName, string sqlConnectionString)
         {
-            _sqlConnection.Value.Dispose();
-        }
-    }
+            if (string.IsNullOrEmpty(profileName))
+                throw new ArgumentException("Value cannot be null or empty.", nameof(profileName));
+            if (string.IsNullOrEmpty(sqlConnectionString))
+                throw new ArgumentException("Value cannot be null or empty.", nameof(sqlConnectionString));
 
-    public Task SendMailAsync(EmailMessage emailMessage)
-    {
-        var sqlCommand = new SqlCommand("msdb.dbo.sp_send_dbmail", _sqlConnection.Value)
-        {
-            CommandType = CommandType.StoredProcedure
-        };
-
-        sqlCommand.Parameters.AddWithValue("profile_name", _profileName);
-        if (!string.IsNullOrEmpty(emailMessage.From))
-        {
-	        sqlCommand.Parameters.AddWithValue("from_address", emailMessage.From);
+            _profileName = profileName;
+            _sqlConnection = new Lazy<SqlConnection>(() => GetSqlConnection(sqlConnectionString));
         }
 
-        sqlCommand.Parameters.AddWithValue("recipients", string.Join(";", emailMessage.To));
-        sqlCommand.Parameters.AddWithValue("subject", emailMessage.Subject);
-        sqlCommand.Parameters.AddWithValue("body", emailMessage.Body);
-        sqlCommand.Parameters.AddWithValue("body_format", emailMessage.IsBodyHtml ? "HTML" : "TEXT");
+        private static SqlConnection GetSqlConnection(string sqlConnectionString)
+        {
+            var sqlConnection = new SqlConnection(sqlConnectionString);
+            sqlConnection.Open();
+            return sqlConnection;
+        }
 
-        return sqlCommand.ExecuteNonQueryAsync();
+        public void Dispose()
+        {
+            if (_sqlConnection.IsValueCreated)
+            {
+                _sqlConnection.Value.Dispose();
+            }
+        }
+
+        public Task SendMailAsync(EmailMessage emailMessage)
+        {
+            var sqlCommand = new SqlCommand("msdb.dbo.sp_send_dbmail", _sqlConnection.Value)
+            {
+                CommandType = CommandType.StoredProcedure
+            };
+
+            sqlCommand.Parameters.AddWithValue("profile_name", _profileName);
+            if (!string.IsNullOrEmpty(emailMessage.From))
+            {
+                sqlCommand.Parameters.AddWithValue("from_address", emailMessage.From);
+            }
+
+            sqlCommand.Parameters.AddWithValue("recipients", string.Join(";", emailMessage.To));
+            sqlCommand.Parameters.AddWithValue("subject", emailMessage.Subject);
+            sqlCommand.Parameters.AddWithValue("body", emailMessage.Body);
+            sqlCommand.Parameters.AddWithValue("body_format", emailMessage.IsBodyHtml ? "HTML" : "TEXT");
+
+            return sqlCommand.ExecuteNonQueryAsync();
+        }
     }
 }

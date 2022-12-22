@@ -25,7 +25,33 @@ var log = new LoggerConfiguration()
     {
         ToEmail = "support@example.com",
         MailProfileName = "My_Profile",
-        SqlConnectionString = "Data Source=(local);Integrated Security=True"
+        SqlConnectionString = "Data Source=(local);..."
     })
     .CreateLogger();
+```
+
+You can also use appsettings.json when Serilog.Configuration is used combined with filters to send only exceptions eg. on environments where monitoring is limited.
+```json
+ "Serilog": {
+        "Using": [ "Serilog" ],
+        "WriteTo": [
+            {
+                "Name": "Email",
+                "Filter": [
+                    {
+                        "Name": "ByExcluding",
+                        "Args": {
+                            "expression": "@Level <> Error"
+                        }
+                    }
+                ],
+                "Args": {
+                    "sqlConnectionString": "Data Source=(local);...",
+                    "mailProfileName": "My_Profile",
+                    "toEmail": "support@example.com",
+                    "emailSubject": "Exception on PROD"
+                }
+            }
+        ]
+    }
 ```

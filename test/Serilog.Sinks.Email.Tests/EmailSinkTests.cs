@@ -9,7 +9,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using Serilog.Formatting;
 using Xunit;
 
 namespace Serilog.Sinks.Email.Tests
@@ -113,20 +112,16 @@ namespace Serilog.Sinks.Email.Tests
             Assert.Equal("[Error] A multiline" + Environment.NewLine
                         + "Message" + Environment.NewLine
                         + "System.ArgumentOutOfRangeException: Message of the exception"
-#if NEW_ARGUMENTOUTOFRANGEEXCEPTION_MESSAGE
+
                         + " (Parameter 'parameter1')"
-#else
-                        + Environment.NewLine + "Parameter name: parameter1"
-#endif
+
                         + Environment.NewLine + "", actual.Body);
             Assert.Equal(@"[Error] A multiline" + Environment.NewLine
                         + "Message" + Environment.NewLine
                         + "System.ArgumentOutOfRangeException: Message of the exception"
-#if NEW_ARGUMENTOUTOFRANGEEXCEPTION_MESSAGE
+
                         + " (Parameter 'parameter1')"
-#else
-                        + Environment.NewLine + "Parameter name: parameter1"
-#endif
+
                         + Environment.NewLine + "", actual.Subject);
             Assert.Equal("from@localhost.local", actual.From);
             Assert.Equal(new[] { "to@localhost.local" }, actual.To);

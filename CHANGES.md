@@ -1,3 +1,6 @@
+2.5.0
+* remove MailKit and support for net4.5, net 4.8, netstandard1.3, netstandard2.1
+
 2.2.2
  * allow disabling SMTP SSL certification validation
 

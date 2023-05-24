@@ -42,28 +42,26 @@
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net48' ">
-    <DefineConstants>$(DefineConstants);SYSTEM_NET</DefineConstants>
+    <DefineConstants>$(DefineConstants)</DefineConstants>
   </PropertyGroup>  
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net47' ">
-    <DefineConstants>$(DefineConstants);SYSTEM_NET</DefineConstants>
+    <DefineConstants>$(DefineConstants)</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <DefineConstants>$(DefineConstants);MAIL_KIT</DefineConstants>
+    <DefineConstants>$(DefineConstants)</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.1' ">
-    <DefineConstants>$(DefineConstants);MAIL_KIT</DefineConstants>
+    <DefineConstants>$(DefineConstants)</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <PackageReference Include="NETStandard.Library" Version="2.0.3" />
-    <PackageReference Include="MailKit" Version="2.6.0" />
     <PackageReference Include="System.Linq" Version="4.3.0" />
     <PackageReference Include="System.Threading" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.1' ">
     <PackageReference Include="NETStandard.Library" Version="2.0.3" />
-    <PackageReference Include="MailKit" Version="2.6.0" />
     <PackageReference Include="System.Linq" Version="4.3.0" />
     <PackageReference Include="System.Threading" Version="4.3.0" />
   </ItemGroup>

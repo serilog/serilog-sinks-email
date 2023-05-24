@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if SYSTEM_NET
 using System.ComponentModel;
 using System.Net.Mail;
 using System.Text;
@@ -97,4 +96,3 @@ namespace Serilog.Sinks.Email
         }
     }
 }
-#endif

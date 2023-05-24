@@ -96,22 +96,9 @@ namespace Serilog.Sinks.Email
         /// </summary>
         public bool IsBodyHtml { get; set; }
 
-#if MAIL_KIT
-        /// <summary>
-        /// Set secure socket option
-        /// </summary>
-        public SecureSocketOptions? SecureSocketOption { get; set; }
-
-#endif
-
         internal virtual IEmailTransport CreateEmailTransport()
         {
-#if SYSTEM_NET
             return new SystemMailEmailTransport(this);
-#endif
-#if MAIL_KIT
-            return new MailKitEmailTransport(this);
-#endif
         }
     }
 }

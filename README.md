@@ -5,7 +5,7 @@
 Sends log events by SMTP email.
 
 **Package** - [Serilog.Sinks.Email](http://nuget.org/packages/serilog.sinks.email)
-| **Platforms** - .NET 4.5
+
 
 ```csharp
 var log = new LoggerConfiguration()

@@ -32,17 +32,11 @@ public sealed class EmailConnectionInfo
     const int DefaultPort = 25;
 
     /// <summary>
-    /// The default subject used for email messages.
-    /// </summary>
-    public const string DefaultSubject = "Log Email";
-
-    /// <summary>
     /// Constructs the <see cref="EmailConnectionInfo"/> with the default port and default email subject set.
     /// </summary>
     public EmailConnectionInfo()
     {
         Port = DefaultPort;
-        EmailSubject = DefaultSubject;
         IsBodyHtml = false;
     }
 
@@ -67,12 +61,6 @@ public sealed class EmailConnectionInfo
     /// The email address(es) emails will be sent to. Accepts multiple email addresses separated by comma or semicolon.
     /// </summary>
     public string? ToEmail { get; set; }
-
-    /// <summary>
-    /// The subject to use for the email, this can be a template.
-    /// </summary>
-    [DefaultValue(DefaultSubject)]
-    public string EmailSubject { get; set; }
 
     /// <summary>
     /// Selects the <see cref="SecureSocketOptions.SslOnConnect"/> secure socket option. This is provided for

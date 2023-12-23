@@ -37,17 +37,6 @@ foreach ($src in Get-ChildItem src/*) {
     Pop-Location
 }
 
-foreach ($sample in Get-ChildItem sample/*) {
-    Push-Location $sample
-
-    Write-Output "build: Testing project in $sample"
-
-    & dotnet build -c Release --version-suffix=$buildSuffix
-    if($LASTEXITCODE -ne 0) { throw "failed" }
-
-    Pop-Location
-}
-
 foreach ($test in Get-ChildItem test/*.Tests) {
     Push-Location $test
 

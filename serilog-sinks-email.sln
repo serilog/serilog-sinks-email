@@ -9,14 +9,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{DACEA9
 		.gitignore = .gitignore
 		appveyor.yml = appveyor.yml
 		Build.ps1 = Build.ps1
-		build.sh = build.sh
-		CHANGES.md = CHANGES.md
 		Directory.Build.props = Directory.Build.props
 		global.json = global.json
 		README.md = README.md
 		assets\Serilog.snk = assets\Serilog.snk
-		Setup.ps1 = Setup.ps1
-		setup.sh = setup.sh
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{340DBC35-BD09-414B-818C-978FBCA4CDF1}"

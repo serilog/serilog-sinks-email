@@ -3,6 +3,8 @@ using System.Globalization;
 using System.Reflection;
 using System.Threading;
 using Xunit.Sdk;
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable InconsistentNaming
 
 namespace Serilog.Sinks.Email.Tests
 {

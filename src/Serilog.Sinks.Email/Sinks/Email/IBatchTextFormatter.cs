@@ -25,7 +25,7 @@ namespace Serilog.Sinks.Email;
 /// Use this interface when more control over the formatting of multiple log events is required.
 /// <para/>
 /// Pass an <see cref="IBatchTextFormatter"/> instance for the <see cref="ITextFormatter"/> argument when configuring the email sink with
-/// <see cref="Serilog.LoggerConfigurationEmailExtensions.Email(LoggerSinkConfiguration,EmailConnectionInfo,ITextFormatter,LogEventLevel,int,TimeSpan?,string)"/>.
+/// <see cref="Serilog.LoggerConfigurationEmailExtensions.Email(LoggerSinkConfiguration,EmailConnectionInfo,ITextFormatter,LogEventLevel,int,TimeSpan?,IFormatProvider,string)"/>.
 /// <example>
 /// This interface might be used to write a header and/or a footer before/after formatting multiple log events,
 /// for example to format the events inside a table of an html email. It could also be used to group events by log level.

@@ -63,7 +63,7 @@ public static class LoggerConfigurationEmailExtensions
         LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
         int batchPostingLimit = DefaultBatchPostingLimit,
         TimeSpan? period = null,
-        IFormatProvider formatProvider = null,
+        IFormatProvider? formatProvider = null,
         string mailSubject = EmailConnectionInfo.DefaultSubject)
     {
         if (loggerConfiguration == null) throw new ArgumentNullException(nameof(loggerConfiguration));
@@ -109,12 +109,12 @@ public static class LoggerConfigurationEmailExtensions
         string fromEmail,
         string toEmail,
         string mailServer,
-        ICredentialsByHost networkCredential = null,
+        ICredentialsByHost? networkCredential = null,
         string outputTemplate = DefaultOutputTemplate,
         LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
         int batchPostingLimit = DefaultBatchPostingLimit,
         TimeSpan? period = null,
-        IFormatProvider formatProvider = null,
+        IFormatProvider? formatProvider = null,
         string mailSubject = EmailConnectionInfo.DefaultSubject)
     {
         if (loggerConfiguration == null) throw new ArgumentNullException(nameof(loggerConfiguration));
@@ -162,12 +162,12 @@ public static class LoggerConfigurationEmailExtensions
         string fromEmail,
         IEnumerable<string> toEmails,
         string mailServer,
-        ICredentialsByHost networkCredential = null,
+        ICredentialsByHost? networkCredential = null,
         string outputTemplate = DefaultOutputTemplate,
         LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
         int batchPostingLimit = DefaultBatchPostingLimit,
         TimeSpan? period = null,
-        IFormatProvider formatProvider = null,
+        IFormatProvider? formatProvider = null,
         string mailSubject = EmailConnectionInfo.DefaultSubject)
     {
         if (loggerConfiguration == null) throw new ArgumentNullException(nameof(loggerConfiguration));
@@ -190,7 +190,7 @@ public static class LoggerConfigurationEmailExtensions
     /// Adds a sink that sends log events via email.
     /// </summary>
     /// <param name="loggerConfiguration">The logger configuration.</param>
-    /// <param name="connectionInfo">The connection info used for</param>
+    /// <param name="connectionInfo">The connection info used for sending email.</param>
     /// <param name="outputTemplate">A message template describing the format used to write to the sink.
     /// the default is "{Timestamp} [{Level}] {Message}{NewLine}{Exception}".</param>
     /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
@@ -210,7 +210,7 @@ public static class LoggerConfigurationEmailExtensions
         LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
         int batchPostingLimit = DefaultBatchPostingLimit,
         TimeSpan? period = null,
-        IFormatProvider formatProvider = null,
+        IFormatProvider? formatProvider = null,
         string mailSubject = EmailConnectionInfo.DefaultSubject)
     {
         if (connectionInfo == null) throw new ArgumentNullException(nameof(connectionInfo));
@@ -264,7 +264,7 @@ public static class LoggerConfigurationEmailExtensions
         LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
         int batchPostingLimit = DefaultBatchPostingLimit,
         TimeSpan? period = null,
-        IFormatProvider formatProvider = null,
+        IFormatProvider? formatProvider = null,
         string mailSubject = EmailConnectionInfo.DefaultSubject)
     {
         if (connectionInfo == null) throw new ArgumentNullException(nameof(connectionInfo));

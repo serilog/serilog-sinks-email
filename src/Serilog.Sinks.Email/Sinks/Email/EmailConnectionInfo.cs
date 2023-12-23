@@ -49,7 +49,7 @@ public sealed class EmailConnectionInfo
     /// <summary>
     /// Gets or sets the credentials used for authentication.
     /// </summary>
-    public ICredentialsByHost NetworkCredentials { get; set; }
+    public ICredentialsByHost? NetworkCredentials { get; set; }
 
     /// <summary>
     /// Gets or sets the port used for the connection.
@@ -61,12 +61,12 @@ public sealed class EmailConnectionInfo
     /// <summary>
     /// The email address emails will be sent from.
     /// </summary>
-    public string FromEmail { get; set; }
+    public string? FromEmail { get; set; }
 
     /// <summary>
     /// The email address(es) emails will be sent to. Accepts multiple email addresses separated by comma or semicolon.
     /// </summary>
-    public string ToEmail { get; set; }
+    public string? ToEmail { get; set; }
 
     /// <summary>
     /// The subject to use for the email, this can be a template.
@@ -91,12 +91,12 @@ public sealed class EmailConnectionInfo
     /// <summary>
     /// Provides a method that validates server certificates.
     /// </summary>
-    public System.Net.Security.RemoteCertificateValidationCallback ServerCertificateValidationCallback { get; set; }
+    public System.Net.Security.RemoteCertificateValidationCallback? ServerCertificateValidationCallback { get; set; }
 
     /// <summary>
     /// The SMTP email server to use.
     /// </summary>
-    public string MailServer { get; set; }
+    public string? MailServer { get; set; }
 
     /// <summary>
     /// Sets whether the body contents of the email is HTML. Defaults to false.

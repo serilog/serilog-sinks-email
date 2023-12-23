@@ -19,7 +19,6 @@ using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.PeriodicBatching;
 using System.Linq;
-using MimeKit;
 
 namespace Serilog.Sinks.Email;
 
@@ -81,8 +80,8 @@ class EmailSink : IBatchedLogEventSink, IDisposable
         _subjectLineFormatter.Format(events.OrderByDescending(e => e.Level).First(), subject);
 
         var email = new EmailMessage(
-            _connectionInfo.FromEmail,
-            _connectionInfo.ToEmail.Split(MailAddressesSplitCharacters, StringSplitOptions.RemoveEmptyEntries),
+            _connectionInfo.FromEmail!,
+            _connectionInfo.ToEmail!.Split(MailAddressesSplitCharacters, StringSplitOptions.RemoveEmptyEntries),
             subject.ToString(),
             payload.ToString(),
             _connectionInfo.IsBodyHtml);

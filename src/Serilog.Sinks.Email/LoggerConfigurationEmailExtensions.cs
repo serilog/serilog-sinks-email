@@ -17,6 +17,7 @@ using System.Linq;
 using System.Net;
 using MailKit.Security;
 using Serilog.Configuration;
+using Serilog.Core;
 using Serilog.Events;
 using Serilog.Formatting.Display;
 using Serilog.Sinks.Email;
@@ -48,12 +49,15 @@ public static class LoggerConfigurationEmailExtensions
     /// <param name="credentials">The network credentials to use to authenticate with mailServer</param>
     /// <param name="body">A message template describing the format used to write to the sink.
     /// the default is "{Timestamp} [{Level}] {Message}{NewLine}{Exception}".</param>
-    /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
     /// <param name="batchSizeLimit">The maximum number of events to post in a single batch.</param>
     /// <param name="bufferingTimeLimit">The time to wait between checking for event batches.</param>
     /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
     /// <param name="subject">The subject, can be a plain string or a template such as {Timestamp} [{Level}] occurred.</param>
     /// <param name="port">Gets or sets the port used for the SMTP connection. The default is 25.</param>
+    /// <param name="restrictedToMinimumLevel">The minimum level for
+    /// events passed through the sink. Ignored when <paramref name="levelSwitch"/> is specified.</param>
+    /// <param name="levelSwitch">A switch allowing the pass-through minimum level
+    /// to be changed at runtime.</param>
     /// <returns>
     /// Logger configuration, allowing configuration to continue.
     /// </returns>
@@ -69,9 +73,10 @@ public static class LoggerConfigurationEmailExtensions
         string? subject = null,
         string? body = null,
         IFormatProvider? formatProvider = null,
-        LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
         int batchSizeLimit = DefaultBatchPostingLimit,
-        TimeSpan? bufferingTimeLimit = null)
+        TimeSpan? bufferingTimeLimit = null,
+        LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+        LoggingLevelSwitch? levelSwitch = null)
     {
         if (loggerConfiguration == null) throw new ArgumentNullException(nameof(loggerConfiguration));
         if (from == null) throw new ArgumentNullException(nameof(from));
@@ -107,7 +112,8 @@ public static class LoggerConfigurationEmailExtensions
             loggerConfiguration,
             connectionInfo,
             batchingOptions,
-            restrictedToMinimumLevel);
+            restrictedToMinimumLevel,
+            levelSwitch);
     }
 
     /// <summary>
@@ -115,8 +121,11 @@ public static class LoggerConfigurationEmailExtensions
     /// </summary>
     /// <param name="loggerConfiguration">The logger configuration.</param>
     /// <param name="options">The connection info used for</param>
-    /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
     /// <param name="batchingOptions">Optionally, a <see cref="PeriodicBatchingSinkOptions"/> to control background batching.</param>
+    /// <param name="restrictedToMinimumLevel">The minimum level for
+    /// events passed through the sink. Ignored when <paramref name="levelSwitch"/> is specified.</param>
+    /// <param name="levelSwitch">A switch allowing the pass-through minimum level
+    /// to be changed at runtime.</param>
     /// <returns>
     /// Logger configuration, allowing configuration to continue.
     /// </returns>
@@ -125,7 +134,8 @@ public static class LoggerConfigurationEmailExtensions
         this LoggerSinkConfiguration loggerConfiguration,
         EmailSinkOptions options,
         PeriodicBatchingSinkOptions? batchingOptions = null,
-        LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
+        LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+        LoggingLevelSwitch? levelSwitch = null)
     {
         if (options == null) throw new ArgumentNullException(nameof(options));
 
@@ -142,7 +152,7 @@ public static class LoggerConfigurationEmailExtensions
 
         var batchingSink = new PeriodicBatchingSink(sink, batchingOptions);
 
-        return loggerConfiguration.Sink(batchingSink, restrictedToMinimumLevel);
+        return loggerConfiguration.Sink(batchingSink, restrictedToMinimumLevel, levelSwitch);
     }
 
 

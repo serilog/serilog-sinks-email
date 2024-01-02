@@ -30,4 +30,3 @@ Supported options are:
 | `formatProvider`       | Supplies culture-specific formatting information. The default is to use the current culture.                                       |
 
 An overload accepting `EmailSinkOptions` can be used to specify advanced options such as HTML body templates.
-~~~~

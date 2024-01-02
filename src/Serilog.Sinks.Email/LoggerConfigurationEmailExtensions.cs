@@ -51,7 +51,6 @@ public static class LoggerConfigurationEmailExtensions
     /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
     /// <param name="batchSizeLimit">The maximum number of events to post in a single batch.</param>
     /// <param name="bufferingTimeLimit">The time to wait between checking for event batches.</param>
-    /// <param name="isBodyHtml"></param>
     /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
     /// <param name="subject">The subject, can be a plain string or a template such as {Timestamp} [{Level}] occurred.</param>
     /// <param name="port">Gets or sets the port used for the SMTP connection. The default is 25.</param>
@@ -69,7 +68,6 @@ public static class LoggerConfigurationEmailExtensions
         ICredentialsByHost? credentials = null,
         string? subject = null,
         string? body = null,
-        bool isBodyHtml = false,
         IFormatProvider? formatProvider = null,
         LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
         int batchSizeLimit = DefaultBatchPostingLimit,
@@ -88,7 +86,7 @@ public static class LoggerConfigurationEmailExtensions
             Port = port,
             ConnectionSecurity = connectionSecurity,
             Credentials = credentials,
-            IsBodyHtml = isBodyHtml
+            IsBodyHtml = false, // `MessageTemplateTextFormatter` cannot emit valid HTML; the `EmailSinkOptions` overload must be used for this.
         };
 
         if (subject != null)

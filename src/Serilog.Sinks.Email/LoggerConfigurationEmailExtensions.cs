@@ -31,7 +31,6 @@ namespace Serilog;
 /// </summary>
 public static class LoggerConfigurationEmailExtensions
 {
-    const int DefaultBatchPostingLimit = 100;
     static readonly TimeSpan DefaultPeriod = TimeSpan.FromSeconds(30);
     const int DefaultQueueLimit = 10000;
 
@@ -49,8 +48,6 @@ public static class LoggerConfigurationEmailExtensions
     /// <param name="credentials">The network credentials to use to authenticate with mailServer</param>
     /// <param name="body">A message template describing the format used to write to the sink.
     /// the default is "{Timestamp} [{Level}] {Message}{NewLine}{Exception}".</param>
-    /// <param name="batchSizeLimit">The maximum number of events to post in a single batch.</param>
-    /// <param name="bufferingTimeLimit">The time to wait between checking for event batches.</param>
     /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
     /// <param name="subject">The subject, can be a plain string or a template such as {Timestamp} [{Level}] occurred.</param>
     /// <param name="port">Gets or sets the port used for the SMTP connection. The default is 25.</param>
@@ -73,8 +70,6 @@ public static class LoggerConfigurationEmailExtensions
         string? subject = null,
         string? body = null,
         IFormatProvider? formatProvider = null,
-        int batchSizeLimit = DefaultBatchPostingLimit,
-        TimeSpan? bufferingTimeLimit = null,
         LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
         LoggingLevelSwitch? levelSwitch = null)
     {
@@ -100,18 +95,10 @@ public static class LoggerConfigurationEmailExtensions
         if (body != null)
             connectionInfo.Body = new MessageTemplateTextFormatter(body, formatProvider);
 
-        var batchingOptions = new PeriodicBatchingSinkOptions
-        {
-            BatchSizeLimit = batchSizeLimit,
-            Period = bufferingTimeLimit ?? DefaultPeriod,
-            EagerlyEmitFirstEvent = false,
-            QueueLimit = DefaultQueueLimit,
-        };
-
         return Email(
             loggerConfiguration,
             connectionInfo,
-            batchingOptions,
+            null,
             restrictedToMinimumLevel,
             levelSwitch);
     }
@@ -141,10 +128,11 @@ public static class LoggerConfigurationEmailExtensions
 
         batchingOptions ??= new PeriodicBatchingSinkOptions
         {
-            BatchSizeLimit = DefaultBatchPostingLimit,
+            // Batching not used by default: fire off an email immediately upon receiving each event.
+            BatchSizeLimit = 1,
             Period = DefaultPeriod,
-            EagerlyEmitFirstEvent = false,
-            QueueLimit = DefaultQueueLimit
+            EagerlyEmitFirstEvent = true,
+            QueueLimit = DefaultQueueLimit,
         };
 
         var transport = new MailKitEmailTransport(options);

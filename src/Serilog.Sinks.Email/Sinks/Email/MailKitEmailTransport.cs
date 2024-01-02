@@ -19,7 +19,7 @@ using MimeKit;
 
 namespace Serilog.Sinks.Email;
 
-class MailKitEmailTransport(EmailConnectionInfo connectionInfo) : IEmailTransport
+class MailKitEmailTransport(EmailSinkOptions options) : IEmailTransport
 {
     public async Task SendMailAsync(EmailMessage emailMessage)
     {
@@ -28,7 +28,7 @@ class MailKitEmailTransport(EmailConnectionInfo connectionInfo) : IEmailTranspor
         mimeMessage.From.Add(fromAddress);
         mimeMessage.To.AddRange(emailMessage.To.Select(MailboxAddress.Parse));
         mimeMessage.Subject = emailMessage.Subject;
-        mimeMessage.Body = connectionInfo.IsBodyHtml
+        mimeMessage.Body = options.IsBodyHtml
             ? new BodyBuilder { HtmlBody = emailMessage.Body }.ToMessageBody()
             : new BodyBuilder { TextBody = emailMessage.Body }.ToMessageBody();
 
@@ -41,21 +41,21 @@ class MailKitEmailTransport(EmailConnectionInfo connectionInfo) : IEmailTranspor
     {
         var smtpClient = new SmtpClient();
 
-        if (string.IsNullOrWhiteSpace(connectionInfo.MailServer)) return smtpClient;
+        if (string.IsNullOrWhiteSpace(options.Host)) return smtpClient;
 
-        if (connectionInfo.ServerCertificateValidationCallback != null)
+        if (options.ServerCertificateValidationCallback != null)
         {
-            smtpClient.ServerCertificateValidationCallback += connectionInfo.ServerCertificateValidationCallback;
+            smtpClient.ServerCertificateValidationCallback += options.ServerCertificateValidationCallback;
         }
 
-        smtpClient.Connect(connectionInfo.MailServer, connectionInfo.Port, connectionInfo.GetSecureSocketOption());
+        smtpClient.Connect(options.Host, options.Port, options.ConnectionSecurity);
 
-        if (connectionInfo.NetworkCredentials != null)
+        if (options.Credentials != null)
         {
             smtpClient.Authenticate(
                 Encoding.UTF8,
-                connectionInfo.NetworkCredentials.GetCredential(
-                    connectionInfo.MailServer, connectionInfo.Port, "smtp"));
+                options.Credentials.GetCredential(
+                    options.Host, options.Port, "smtp"));
         }
         return smtpClient;
     }

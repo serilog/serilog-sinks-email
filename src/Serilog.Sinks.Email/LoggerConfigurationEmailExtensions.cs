@@ -12,12 +12,14 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
+using MailKit.Security;
 using Serilog.Configuration;
 using Serilog.Events;
 using Serilog.Formatting.Display;
 using Serilog.Sinks.Email;
-using Serilog.Formatting;
 using Serilog.Sinks.PeriodicBatching;
 // ReSharper disable MemberCanBePrivate.Global
 
@@ -28,121 +30,130 @@ namespace Serilog;
 /// </summary>
 public static class LoggerConfigurationEmailExtensions
 {
-    const string DefaultOutputTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level}] {Message}{NewLine}{Exception}";
     const int DefaultBatchPostingLimit = 100;
     static readonly TimeSpan DefaultPeriod = TimeSpan.FromSeconds(30);
-    const string DefaultSubject = "Log Messages";
     const int DefaultQueueLimit = 10000;
 
     /// <summary>
     /// Adds a sink that sends log events via email.
     /// </summary>
     /// <param name="loggerConfiguration">The logger configuration.</param>
-    /// <param name="fromEmail">The email address emails will be sent from.</param>
-    /// <param name="toEmail">The email address emails will be sent to. Multiple addresses can be separated
-    /// with a comma or semicolon.</param>
-    /// <param name="mailServer">The SMTP email server to use</param>
-    /// <param name="networkCredential">The network credentials to use to authenticate with mailServer</param>
-    /// <param name="outputTemplate">A message template describing the format used to write to the sink.
+    /// <param name="from">The email address emails will be sent from.</param>
+    /// <param name="to">The email address emails will be sent to. Multiple addresses can be separated
+    /// with commas or semicolons.</param>
+    /// <param name="host">The SMTP email server to use</param>
+    /// <param name="connectionSecurity">Choose the security applied to the SMTP connection. This enumeration type
+    /// is supplied by MailKit; see <see cref="SecureSocketOptions"/> for supported values. The default is
+    /// <see cref="SecureSocketOptions.Auto"/>.</param>
+    /// <param name="credentials">The network credentials to use to authenticate with mailServer</param>
+    /// <param name="body">A message template describing the format used to write to the sink.
     /// the default is "{Timestamp} [{Level}] {Message}{NewLine}{Exception}".</param>
     /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
-    /// <param name="batchPostingLimit">The maximum number of events to post in a single batch.</param>
-    /// <param name="period">The time to wait between checking for event batches.</param>
+    /// <param name="batchSizeLimit">The maximum number of events to post in a single batch.</param>
+    /// <param name="bufferingTimeLimit">The time to wait between checking for event batches.</param>
+    /// <param name="isBodyHtml"></param>
     /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
-    /// <param name="mailSubject">The subject, can be a plain string or a template such as {Timestamp} [{Level}] occurred.</param>
+    /// <param name="subject">The subject, can be a plain string or a template such as {Timestamp} [{Level}] occurred.</param>
+    /// <param name="port">Gets or sets the port used for the SMTP connection. The default is 25.</param>
     /// <returns>
     /// Logger configuration, allowing configuration to continue.
     /// </returns>
     /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
     public static LoggerConfiguration Email(
         this LoggerSinkConfiguration loggerConfiguration,
-        string fromEmail,
-        string toEmail,
-        string mailServer,
-        ICredentialsByHost? networkCredential = null,
-        string? outputTemplate = null,
-        LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-        int? batchPostingLimit = null,
-        TimeSpan? period = null,
+        string from,
+        string to,
+        string host,
+        int port = EmailSinkOptions.DefaultPort,
+        SecureSocketOptions connectionSecurity = EmailSinkOptions.DefaultConnectionSecurity,
+        ICredentialsByHost? credentials = null,
+        string? subject = null,
+        string? body = null,
+        bool isBodyHtml = false,
         IFormatProvider? formatProvider = null,
-        string? mailSubject = null)
+        LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+        int batchSizeLimit = DefaultBatchPostingLimit,
+        TimeSpan? bufferingTimeLimit = null)
     {
         if (loggerConfiguration == null) throw new ArgumentNullException(nameof(loggerConfiguration));
-        if (fromEmail == null) throw new ArgumentNullException(nameof(fromEmail));
-        if (toEmail == null) throw new ArgumentNullException(nameof(toEmail));
-        if (mailServer == null) throw new ArgumentNullException(nameof(mailServer));
+        if (from == null) throw new ArgumentNullException(nameof(from));
+        if (to == null) throw new ArgumentNullException(nameof(to));
+        if (host == null) throw new ArgumentNullException(nameof(host));
 
-        var connectionInfo = new EmailConnectionInfo
+        var connectionInfo = new EmailSinkOptions
         {
-            FromEmail = fromEmail,
-            ToEmail = toEmail,
-            MailServer = mailServer,
-            NetworkCredentials = networkCredential
+            From = from,
+            To = SplitToAddresses(to),
+            Host = host,
+            Port = port,
+            ConnectionSecurity = connectionSecurity,
+            Credentials = credentials,
+            IsBodyHtml = isBodyHtml
         };
+
+        if (subject != null)
+            connectionInfo.Subject = new MessageTemplateTextFormatter(subject, formatProvider);
+
+        if (body != null)
+            connectionInfo.Body = new MessageTemplateTextFormatter(body, formatProvider);
 
         var batchingOptions = new PeriodicBatchingSinkOptions
         {
-            BatchSizeLimit = batchPostingLimit ?? DefaultBatchPostingLimit,
-            Period = period ?? DefaultPeriod,
-            EagerlyEmitFirstEvent = false,  // set default to false, not usable for emailing
+            BatchSizeLimit = batchSizeLimit,
+            Period = bufferingTimeLimit ?? DefaultPeriod,
+            EagerlyEmitFirstEvent = false,
             QueueLimit = DefaultQueueLimit,
         };
 
         return Email(
             loggerConfiguration,
             connectionInfo,
-            new MessageTemplateTextFormatter(outputTemplate ?? DefaultOutputTemplate, formatProvider),
-            new MessageTemplateTextFormatter(mailSubject ?? DefaultSubject, formatProvider),
-            restrictedToMinimumLevel,
-            batchingOptions);
+            batchingOptions,
+            restrictedToMinimumLevel);
     }
 
     /// <summary>
     /// Adds a sink that sends log events via email.
     /// </summary>
     /// <param name="loggerConfiguration">The logger configuration.</param>
-    /// <param name="connectionInfo">The connection info used for</param>
-    /// <param name="bodyFormatter">The <see cref="ITextFormatter"/> or <see cref="IBatchTextFormatter"/> implementation
-    /// to write log entries to email. Specify <c>null</c> to use the default body. . Consider using
-    /// <see cref="MessageTemplateTextFormatter"/> or <c>Serilog.Expressions</c> templates.</param>
-    /// <param name="subjectFormatter">The <see cref="ITextFormatter"/> implementation to format email subjects. Specify
-    /// <c>null</c> to use the default subject. Consider using <see cref="MessageTemplateTextFormatter"/> or
-    /// <c>Serilog.Expressions</c> templates.</param>
+    /// <param name="options">The connection info used for</param>
     /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
     /// <param name="batchingOptions">Optionally, a <see cref="PeriodicBatchingSinkOptions"/> to control background batching.</param>
-    /// <param name="defaultFormatProvider">An <see cref="IFormatProvider"/> to use when constructing the default subject or
-    /// body formatters; ignored when subject and body formatters are supplied.</param>
     /// <returns>
     /// Logger configuration, allowing configuration to continue.
     /// </returns>
     /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
     public static LoggerConfiguration Email(
         this LoggerSinkConfiguration loggerConfiguration,
-        EmailConnectionInfo connectionInfo,
-        ITextFormatter? bodyFormatter = null,
-        ITextFormatter? subjectFormatter = null,
-        LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+        EmailSinkOptions options,
         PeriodicBatchingSinkOptions? batchingOptions = null,
-        IFormatProvider? defaultFormatProvider = null)
+        LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
     {
-        if (connectionInfo == null) throw new ArgumentNullException(nameof(connectionInfo));
-
-        bodyFormatter ??= new MessageTemplateTextFormatter(DefaultOutputTemplate, defaultFormatProvider);
-        subjectFormatter ??= new MessageTemplateTextFormatter(DefaultSubject, defaultFormatProvider);
+        if (options == null) throw new ArgumentNullException(nameof(options));
 
         batchingOptions ??= new PeriodicBatchingSinkOptions
         {
             BatchSizeLimit = DefaultBatchPostingLimit,
             Period = DefaultPeriod,
-            EagerlyEmitFirstEvent = false,  // set default to false, not usable for emailing
+            EagerlyEmitFirstEvent = false,
             QueueLimit = DefaultQueueLimit
         };
 
-        var transport = new MailKitEmailTransport(connectionInfo);
-        var sink = new EmailSink(connectionInfo, bodyFormatter, subjectFormatter, transport);
+        var transport = new MailKitEmailTransport(options);
+        var sink = new EmailSink(options, transport);
 
         var batchingSink = new PeriodicBatchingSink(sink, batchingOptions);
 
         return loggerConfiguration.Sink(batchingSink, restrictedToMinimumLevel);
+    }
+
+
+    internal static List<string> SplitToAddresses(string? toEmail)
+    {
+        return (toEmail ?? "")
+            .Split(';', ',')
+            .Select(s => s.Trim())
+            .Where(s => !string.IsNullOrEmpty(s))
+            .ToList();
     }
 }

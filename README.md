@@ -9,10 +9,10 @@ Sends log events by SMTP email.
 ```csharp
 var log = new LoggerConfiguration()
     .WriteTo.Email(
-        fromEmail: "app@example.com",
-        toEmail: "support@example.com",
-        mailServer: "smtp.example.com")
-    .CreateLogger();
+        from: "app@example.com",
+        to: "support@example.com",
+        host: "smtp.example.com")
+    .CreateLogger();~~~~
 ```
 
-An overload accepting `EmailConnectionInfo` can be used to specify advanced options.
+An overload accepting `EmailSinkOptions` can be used to specify advanced options.

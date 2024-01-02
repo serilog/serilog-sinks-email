@@ -16,7 +16,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Serilog.Events;
-using Serilog.Formatting;
 using Serilog.Sinks.PeriodicBatching;
 using System.Linq;
 
@@ -24,37 +23,24 @@ namespace Serilog.Sinks.Email;
 
 class EmailSink : IBatchedLogEventSink, IDisposable
 {
-    static readonly char[] MailAddressesSplitCharacters = { ';', ',' };
-
-    readonly EmailConnectionInfo _connectionInfo;
+    readonly EmailSinkOptions _sinkOptions;
     readonly IEmailTransport _emailTransport;
-
-    readonly ITextFormatter _textFormatter;
-
-    readonly ITextFormatter _subjectLineFormatter;
-
     /// <summary>
     /// Construct a sink emailing with the specified details.
     /// </summary>
-    /// <param name="connectionInfo">Connection information used to construct the SMTP client and mail messages.</param>
-    /// <param name="textFormatter">Supplies culture-specific formatting information, or null.</param>
-    /// <param name="subjectLineFormatter">Supplies culture-specific formatting information, or null.</param>
+    /// <param name="options">Connection information used to construct the SMTP client and mail messages.</param>
     /// <param name="emailTransport">The email transport to use.</param>
     /// <exception cref="System.ArgumentNullException">connectionInfo</exception>
-    public EmailSink(EmailConnectionInfo connectionInfo, ITextFormatter textFormatter, ITextFormatter subjectLineFormatter, IEmailTransport emailTransport)
+    public EmailSink(EmailSinkOptions options, IEmailTransport emailTransport)
     {
-        _connectionInfo = connectionInfo ?? throw new ArgumentNullException(nameof(connectionInfo));
+        _sinkOptions = options ?? throw new ArgumentNullException(nameof(options));
         _emailTransport = emailTransport ?? throw new ArgumentNullException(nameof(emailTransport));
-        _textFormatter = textFormatter;
-        _subjectLineFormatter = subjectLineFormatter;
     }
 
     /// <summary>
     /// Emit a batch of log events, running asynchronously.
     /// </summary>
     /// <param name="events">The events to emit.</param>
-    /// <remarks>Override either <see cref="PeriodicBatchingSink.EmitBatch"/> or <see cref="PeriodicBatchingSink.EmitBatchAsync"/>,
-    /// not both.</remarks>
     public Task EmitBatchAsync(IEnumerable<LogEvent> events)
     {
         // ReSharper disable PossibleMultipleEnumeration
@@ -64,7 +50,7 @@ class EmailSink : IBatchedLogEventSink, IDisposable
 
         var payload = new StringWriter();
 
-        if (_textFormatter is IBatchTextFormatter batchTextFormatter)
+        if (_sinkOptions.Body is IBatchTextFormatter batchTextFormatter)
         {
             batchTextFormatter.FormatBatch(events, payload);
         }
@@ -72,19 +58,19 @@ class EmailSink : IBatchedLogEventSink, IDisposable
         {
             foreach (var logEvent in events)
             {
-                _textFormatter.Format(logEvent, payload);
+                _sinkOptions.Body.Format(logEvent, payload);
             }
         }
 
         var subject = new StringWriter();
-        _subjectLineFormatter.Format(events.OrderByDescending(e => e.Level).First(), subject);
+        _sinkOptions.Subject.Format(events.OrderByDescending(e => e.Level).First(), subject);
 
         var email = new EmailMessage(
-            _connectionInfo.FromEmail!,
-            _connectionInfo.ToEmail!.Split(MailAddressesSplitCharacters, StringSplitOptions.RemoveEmptyEntries),
+            _sinkOptions.From,
+            _sinkOptions.To,
             subject.ToString(),
             payload.ToString(),
-            _connectionInfo.IsBodyHtml);
+            _sinkOptions.IsBodyHtml);
 
         return _emailTransport.SendMailAsync(email);
 

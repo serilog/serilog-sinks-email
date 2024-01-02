@@ -3,7 +3,7 @@ using System.IO;
 using System.Net;
 using Serilog.Events;
 
-namespace Serilog.Sinks.Email.Tests;
+namespace Serilog.Sinks.Email.Tests.Support;
 
 class HtmlTableFormatter : IBatchTextFormatter
 {

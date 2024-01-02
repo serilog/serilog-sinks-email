@@ -122,7 +122,7 @@ public class EmailSinkTests
                                             + Environment.NewLine + "", actual.Subject);
         Assert.Equal("from@localhost.local", actual.From);
         Assert.Equal(new[] { "to@localhost.local" }, actual.To);
-        Assert.True(actual.IsBodyHtml);
+        Assert.False(actual.IsBodyHtml);
     }
 
     [Fact]
@@ -148,8 +148,9 @@ public class EmailSinkTests
             emailLogger.Error("<Error>");
         }
 
-        var body = emailTransport.Sent.Single().Body;
-        Assert.Equal("<table><tr>Information</tr><tr>Warning</tr><tr>&lt;Error&gt;</tr></table>", body);
+        var single = emailTransport.Sent.Single();
+        Assert.True(single.IsBodyHtml);
+        Assert.Equal("<table><tr>Information</tr><tr>Warning</tr><tr>&lt;Error&gt;</tr></table>", single.Body);
     }
 
     static EmailSink CreateDefaultEmailSink(EmailSinkOptions options, IEmailTransport transport)

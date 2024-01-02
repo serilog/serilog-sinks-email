@@ -12,7 +12,7 @@ public class LoggerConfigurationEmailExtensionsTests
             [null, Array.Empty<string>()],
             ["", Array.Empty<string>()],
             ["to@localhost", new[] {"to@localhost" }],
-            ["to@localhost, Example <example@example.com>; Another <another@example.com> ", new[] {"to@localhost", "example@example.com", "another@example.com" }]
+            ["to@localhost, Example <example@example.com>; Another <another@example.com> ", new[] {"to@localhost", "Example <example@example.com>", "Another <another@example.com>" }]
         ];
     }
 

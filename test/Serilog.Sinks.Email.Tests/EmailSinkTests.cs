@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Serilog.Sinks.Email.Tests.Support;
 using Serilog.Sinks.PeriodicBatching;
 using Xunit;
 using Xunit.Abstractions;
@@ -27,11 +28,11 @@ public class EmailSinkTests
 
         using (var emailLogger = new LoggerConfiguration()
                    .WriteTo.Email(
-                       fromEmail: "from@localhost.local",
-                       toEmail: "to@localhost.local",
-                       mailServer: "localhost",
-                       outputTemplate: "[{Level}] {Message}{NewLine}{Exception}",
-                       mailSubject: "subject")
+                       from: "from@localhost.local",
+                       to: "to@localhost.local",
+                       host: "localhost",
+                       body: "[{Level}] {Message}{NewLine}{Exception}",
+                       subject: "subject")
                    .CreateLogger())
         {
             emailLogger.Information("test {test}", "test");
@@ -48,11 +49,11 @@ public class EmailSinkTests
 
         using (var emailLogger = new LoggerConfiguration()
                    .WriteTo.Email(
-                       fromEmail: "from@smtpserver.local",
-                       toEmail: "to@smtpserver.local",
-                       mailServer: "smtpserver.local",
-                       outputTemplate: "[{Level}] {Message}{NewLine}{Exception}",
-                       mailSubject: "test subject")
+                       from: "from@smtpserver.local",
+                       to: "to@smtpserver.local",
+                       host: "smtpserver.local",
+                       body: "[{Level}] {Message}{NewLine}{Exception}",
+                       subject: "test subject")
                    .CreateLogger())
         {
             emailLogger.Information("first test {test}", "test1");
@@ -67,7 +68,7 @@ public class EmailSinkTests
     public void EmailTransportIsDisposedWhenEmailSinkIsDisposed()
     {
         var transport = new TestEmailTransport();
-        var emailSink = CreateDefaultEmailSink(new EmailConnectionInfo(), transport);
+        var emailSink = CreateDefaultEmailSink(new EmailSinkOptions(), transport);
 
         emailSink.Dispose();
 
@@ -78,11 +79,12 @@ public class EmailSinkTests
     [UseCulture("en-us")]
     public async Task SendEmailIsCorrectlyCalledWhenEventAreLogged()
     {
-        var emailConnectionInfo = new EmailConnectionInfo
+        var emailConnectionInfo = new EmailSinkOptions
         {
-            ToEmail = "to@localhost.local",
-            FromEmail = "from@localhost.local",
-            IsBodyHtml = true
+            To = ["to@localhost.local"],
+            From = "from@localhost.local",
+            Body = new MessageTemplateTextFormatter("[{Level}] {Message}{NewLine}{Exception}"),
+            Subject = new MessageTemplateTextFormatter("[{Level}] {Message}{NewLine}{Exception}")
         };
 
         var transport = new TestEmailTransport();
@@ -96,7 +98,7 @@ public class EmailSinkTests
                 LogEventLevel.Error,
                 // ReSharper disable once NotResolvedInText
                 new ArgumentOutOfRangeException("parameter1", "Message of the exception"),
-                new MessageTemplate(@"Subject",
+                new MessageTemplate("Subject",
                     new MessageTemplateToken[]
                     {
                         new PropertyToken("Message", "A multiline" + Environment.NewLine
@@ -113,29 +115,29 @@ public class EmailSinkTests
                                            + "System.ArgumentOutOfRangeException: Message of the exception"
                                            + " (Parameter 'parameter1')"
                                            + Environment.NewLine + "", actual.Body);
-        Assert.Equal(@"[Error] A multiline" + Environment.NewLine
+        Assert.Equal("[Error] A multiline" + Environment.NewLine
                                             + "Message" + Environment.NewLine
                                             + "System.ArgumentOutOfRangeException: Message of the exception"
                                             + " (Parameter 'parameter1')"
                                             + Environment.NewLine + "", actual.Subject);
         Assert.Equal("from@localhost.local", actual.From);
         Assert.Equal(new[] { "to@localhost.local" }, actual.To);
-        Assert.True(actual.IsBodyHtml);
+        Assert.False(actual.IsBodyHtml);
     }
 
     [Fact]
     public void WorksWithIBatchTextFormatter()
     {
-        var emailConnectionInfo = new EmailConnectionInfo
+        var emailConnectionInfo = new EmailSinkOptions
         {
-            ToEmail = "to@example.com",
-            FromEmail = "from@localhost.local",
-            IsBodyHtml = true
+            To = ["to@example.com"],
+            From = "from@localhost.local",
+            IsBodyHtml = true,
+            Body = new HtmlTableFormatter()
         };
 
         var emailTransport = new TestEmailTransport();
-        var sink = new EmailSink(emailConnectionInfo, new HtmlTableFormatter(), new MessageTemplateTextFormatter(""),
-            emailTransport);
+        var sink = new EmailSink(emailConnectionInfo, emailTransport);
 
         using (var emailLogger = new LoggerConfiguration()
                    .WriteTo.Sink(new PeriodicBatchingSink(sink, new PeriodicBatchingSinkOptions()))
@@ -146,19 +148,15 @@ public class EmailSinkTests
             emailLogger.Error("<Error>");
         }
 
-        var body = emailTransport.Sent.Single().Body;
-        Assert.Equal("<table><tr>Information</tr><tr>Warning</tr><tr>&lt;Error&gt;</tr></table>", body);
+        var single = emailTransport.Sent.Single();
+        Assert.True(single.IsBodyHtml);
+        Assert.Equal("<table><tr>Information</tr><tr>Warning</tr><tr>&lt;Error&gt;</tr></table>", single.Body);
     }
 
-    static EmailSink CreateDefaultEmailSink(EmailConnectionInfo emailConnectionInfo, IEmailTransport transport)
+    static EmailSink CreateDefaultEmailSink(EmailSinkOptions options, IEmailTransport transport)
     {
-        var formatter = new MessageTemplateTextFormatter("[{Level}] {Message}{NewLine}{Exception}");
-        var subjectLineFormatter = new MessageTemplateTextFormatter("[{Level}] {Message}{NewLine}{Exception}");
-
         var emailSink = new EmailSink(
-            emailConnectionInfo,
-            formatter,
-            subjectLineFormatter,
+            options,
             transport);
         return emailSink;
     }

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Serilog.Sinks.Email.Tests;
+namespace Serilog.Sinks.Email.Tests.Support;
 
 class TestEmailTransport : IEmailTransport
 {

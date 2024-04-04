@@ -126,6 +126,55 @@ public class EmailSinkTests
     }
 
     [Fact]
+    [UseCulture("en-us")]
+    public async Task SendEmailIsCorrectlyCalledWhenEventAreLoggedAndSinkOptionsAreCreatedFromConstructor()
+    {
+        var emailConnectionInfo = new EmailSinkOptions(
+            "from@localhost.local",
+            "to@localhost.local",
+            "localhost",
+            subject: "[{Level}] {Message}{NewLine}{Exception}",
+            body: "[{Level}] {Message}{NewLine}{Exception}");
+
+        var transport = new TestEmailTransport();
+
+        var emailSink = CreateDefaultEmailSink(emailConnectionInfo, transport);
+
+        await emailSink.EmitBatchAsync(new[]
+        {
+            new LogEvent(
+                DateTimeOffset.Now,
+                LogEventLevel.Error,
+                // ReSharper disable once NotResolvedInText
+                new ArgumentOutOfRangeException("parameter1", "Message of the exception"),
+                new MessageTemplate("Subject",
+                    new MessageTemplateToken[]
+                    {
+                        new PropertyToken("Message", "A multiline" + Environment.NewLine
+                                                                   + "Message")
+                    })
+                , Enumerable.Empty<LogEventProperty>())
+        });
+        emailSink.Dispose();
+
+        var actual = transport.Sent.Single();
+
+        Assert.Equal("[Error] A multiline" + Environment.NewLine
+                                           + "Message" + Environment.NewLine
+                                           + "System.ArgumentOutOfRangeException: Message of the exception"
+                                           + " (Parameter 'parameter1')"
+                                           + Environment.NewLine + "", actual.Body);
+        Assert.Equal("[Error] A multiline" + Environment.NewLine
+                                            + "Message" + Environment.NewLine
+                                            + "System.ArgumentOutOfRangeException: Message of the exception"
+                                            + " (Parameter 'parameter1')"
+                                            + Environment.NewLine + "", actual.Subject);
+        Assert.Equal("from@localhost.local", actual.From);
+        Assert.Equal(new[] { "to@localhost.local" }, actual.To);
+        Assert.False(actual.IsBodyHtml);
+    }
+
+    [Fact]
     public void WorksWithIBatchTextFormatter()
     {
         var emailConnectionInfo = new EmailSinkOptions

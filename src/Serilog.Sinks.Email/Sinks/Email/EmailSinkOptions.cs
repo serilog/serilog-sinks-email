@@ -43,6 +43,54 @@ public sealed class EmailSinkOptions
     }
 
     /// <summary>
+    /// Constructs an <see cref="EmailSinkOptions"/> with specified options.
+    /// </summary>
+    /// <param name="from">The email address emails will be sent from.</param>
+    /// <param name="to">The email address emails will be sent to. Multiple addresses can be separated
+    /// with commas or semicolons.</param>
+    /// <param name="host">The SMTP email server to use</param>
+    /// <param name="port">Gets or sets the port used for the SMTP connection. The default is 25.</param>
+    /// <param name="connectionSecurity">Choose the security applied to the SMTP connection. This enumeration type
+    /// is supplied by MailKit; see <see cref="SecureSocketOptions"/> for supported values. The default is
+    /// <see cref="SecureSocketOptions.Auto"/>.</param>
+    /// <param name="credentials">The network credentials to use to authenticate with mailServer</param>
+    /// <param name="subject">The subject, can be a plain string or a template such as {Timestamp} [{Level}] occurred.</param>
+    /// <param name="body">A message template describing the format used to write to the sink.
+    /// the default is "{Timestamp} [{Level}] {Message}{NewLine}{Exception}".</param>
+    /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
+    public EmailSinkOptions(
+        string from,
+        string to,
+        string host,
+        int port = DefaultPort,
+        SecureSocketOptions connectionSecurity = DefaultConnectionSecurity,
+        ICredentialsByHost? credentials = null,
+        string? subject = null,
+        string? body = null)
+    {
+        if (from == null) throw new ArgumentNullException(nameof(from));
+        if (to == null) throw new ArgumentNullException(nameof(to));
+        if (host == null) throw new ArgumentNullException(nameof(host));
+
+        From = from;
+        To = LoggerConfigurationEmailExtensions.SplitToAddresses(to);
+        Host = host;
+        Port = port;
+        ConnectionSecurity = connectionSecurity;
+        Credentials = credentials;
+
+        if (subject != null)
+        {
+            Subject = new MessageTemplateTextFormatter(subject);
+        }
+
+        if (body != null)
+        {
+            Body = new MessageTemplateTextFormatter(body);
+        }
+    }
+
+    /// <summary>
     /// The email address emails will be sent from.
     /// </summary>
     public string From { get; set; } = null!;

@@ -6,8 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Serilog.Configuration;
 using Serilog.Sinks.Email.Tests.Support;
-using Serilog.Sinks.PeriodicBatching;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -140,7 +140,7 @@ public class EmailSinkTests
         var sink = new EmailSink(emailConnectionInfo, emailTransport);
 
         using (var emailLogger = new LoggerConfiguration()
-                   .WriteTo.Sink(new PeriodicBatchingSink(sink, new PeriodicBatchingSinkOptions()))
+                   .WriteTo.Sink(sink, new BatchingOptions())
                    .CreateLogger())
         {
             emailLogger.Information("Information");

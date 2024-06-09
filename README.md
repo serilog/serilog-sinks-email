@@ -1,8 +1,8 @@
-# Serilog.Sinks.Email
-
-[![Build status](https://ci.appveyor.com/api/projects/status/sfvp7dw8u6aiodj1/branch/main?svg=true)](https://ci.appveyor.com/project/serilog/serilog-sinks-email/branch/main)
+# Serilog.Sinks.Email [![Build status](https://ci.appveyor.com/api/projects/status/sfvp7dw8u6aiodj1/branch/main?svg=true)](https://ci.appveyor.com/project/serilog/serilog-sinks-email/branch/main)
 
 Sends log events by SMTP email.
+
+> ℹ️ Version 3.x of this package changes the name and structure of many configuration parameters from their 2.x names; see below for detailed information.
 
 **Package** - [Serilog.Sinks.Email](http://nuget.org/packages/serilog.sinks.email)
 

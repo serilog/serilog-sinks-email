@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 using Serilog.Events;
 using System.Linq;
 using Serilog.Core;
+using Serilog.Formatting;
 
 namespace Serilog.Sinks.Email;
 
@@ -25,6 +26,7 @@ class EmailSink : IBatchedLogEventSink, IDisposable
 {
     readonly EmailSinkOptions _sinkOptions;
     readonly IEmailTransport _emailTransport;
+
     /// <summary>
     /// Construct a sink emailing with the specified details.
     /// </summary>
@@ -43,38 +45,43 @@ class EmailSink : IBatchedLogEventSink, IDisposable
     /// <param name="events">The events to emit.</param>
     public Task EmitBatchAsync(IReadOnlyCollection<LogEvent> events)
     {
-        // ReSharper disable PossibleMultipleEnumeration
-
         if (events == null)
             throw new ArgumentNullException(nameof(events));
 
-        var payload = new StringWriter();
+        var body = new StringWriter();
 
         if (_sinkOptions.Body is IBatchTextFormatter batchTextFormatter)
         {
-            batchTextFormatter.FormatBatch(events, payload);
+            batchTextFormatter.FormatBatch(events, body);
         }
         else
         {
             foreach (var logEvent in events)
             {
-                _sinkOptions.Body.Format(logEvent, payload);
+                _sinkOptions.Body.Format(logEvent, body);
             }
         }
 
-        var subject = new StringWriter();
-        _sinkOptions.Subject.Format(events.OrderByDescending(e => e.Level).First(), subject);
+        var subject = ComputeMailSubject(_sinkOptions.Subject, events);
 
         var email = new EmailMessage(
             _sinkOptions.From,
             _sinkOptions.To,
-            subject.ToString(),
-            payload.ToString(),
+            subject,
+            body.ToString(),
             _sinkOptions.IsBodyHtml);
 
         return _emailTransport.SendMailAsync(email);
+    }
 
-        // ReSharper restore PossibleMultipleEnumeration
+    internal static string ComputeMailSubject(ITextFormatter subjectLineFormatter, IEnumerable<LogEvent> events)
+    {
+        var subject = new StringWriter();
+        subjectLineFormatter.Format(events.OrderByDescending(e => e.Level).First(), subject);
+        var subjectAsText = subject.ToString();
+        var firstLineOfSubject = subjectAsText.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
+                                     .FirstOrDefault() ?? string.Empty;
+        return firstLineOfSubject;
     }
 
     public Task OnEmptyBatchAsync()

@@ -25,12 +25,11 @@ namespace Serilog.Sinks.Email
 {
     class EmailSink : IBatchedLogEventSink, IDisposable
     {
-        private static readonly char[] MailAddressesSplitCharacters = { ';', ',' };
+        static readonly char[] MailAddressesSplitCharacters = { ';', ',' };
+        
         readonly EmailConnectionInfo _connectionInfo;
         readonly IEmailTransport _emailTransport;
-
         readonly ITextFormatter _textFormatter;
-
         readonly ITextFormatter _subjectLineFormatter;
 
         /// <summary>
@@ -80,7 +79,7 @@ namespace Serilog.Sinks.Email
             await _emailTransport.SendMailAsync(email);
         }
 
-        public static string ComputeMailSubject(ITextFormatter subjectLineFormatter, IEnumerable<LogEvent> events)
+        internal static string ComputeMailSubject(ITextFormatter subjectLineFormatter, IEnumerable<LogEvent> events)
         {
             var subject = new StringWriter();
             subjectLineFormatter.Format(events.OrderByDescending(e => e.Level).First(), subject);

@@ -21,7 +21,6 @@ using Serilog.Core;
 using Serilog.Events;
 using Serilog.Formatting.Display;
 using Serilog.Sinks.Email;
-using Serilog.Sinks.PeriodicBatching;
 // ReSharper disable MemberCanBePrivate.Global
 
 namespace Serilog;
@@ -31,7 +30,7 @@ namespace Serilog;
 /// </summary>
 public static class LoggerConfigurationEmailExtensions
 {
-    static readonly TimeSpan DefaultPeriod = TimeSpan.FromSeconds(30);
+    static readonly TimeSpan DefaultBufferingTimeLimit = TimeSpan.FromSeconds(30);
     const int DefaultQueueLimit = 10000;
 
     /// <summary>
@@ -120,17 +119,17 @@ public static class LoggerConfigurationEmailExtensions
     public static LoggerConfiguration Email(
         this LoggerSinkConfiguration loggerConfiguration,
         EmailSinkOptions options,
-        PeriodicBatchingSinkOptions? batchingOptions = null,
+        BatchingOptions? batchingOptions = null,
         LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
         LoggingLevelSwitch? levelSwitch = null)
     {
         if (options == null) throw new ArgumentNullException(nameof(options));
 
-        batchingOptions ??= new PeriodicBatchingSinkOptions
+        batchingOptions ??= new BatchingOptions
         {
             // Batching not used by default: fire off an email immediately upon receiving each event.
             BatchSizeLimit = 1,
-            Period = DefaultPeriod,
+            BufferingTimeLimit = DefaultBufferingTimeLimit,
             EagerlyEmitFirstEvent = true,
             QueueLimit = DefaultQueueLimit,
         };
@@ -138,9 +137,7 @@ public static class LoggerConfigurationEmailExtensions
         var transport = new MailKitEmailTransport(options);
         var sink = new EmailSink(options, transport);
 
-        var batchingSink = new PeriodicBatchingSink(sink, batchingOptions);
-
-        return loggerConfiguration.Sink(batchingSink, restrictedToMinimumLevel, levelSwitch);
+        return loggerConfiguration.Sink(sink, batchingOptions, restrictedToMinimumLevel, levelSwitch);
     }
 
 

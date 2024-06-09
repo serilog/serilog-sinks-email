@@ -16,8 +16,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Serilog.Events;
-using Serilog.Sinks.PeriodicBatching;
 using System.Linq;
+using Serilog.Core;
 
 namespace Serilog.Sinks.Email;
 
@@ -41,7 +41,7 @@ class EmailSink : IBatchedLogEventSink, IDisposable
     /// Emit a batch of log events, running asynchronously.
     /// </summary>
     /// <param name="events">The events to emit.</param>
-    public Task EmitBatchAsync(IEnumerable<LogEvent> events)
+    public Task EmitBatchAsync(IReadOnlyCollection<LogEvent> events)
     {
         // ReSharper disable PossibleMultipleEnumeration
 

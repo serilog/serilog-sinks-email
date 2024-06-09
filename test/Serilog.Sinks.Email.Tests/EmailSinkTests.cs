@@ -84,7 +84,7 @@ public class EmailSinkTests
             To = ["to@localhost.local"],
             From = "from@localhost.local",
             Body = new MessageTemplateTextFormatter("[{Level}] {Message}{NewLine}{Exception}"),
-            Subject = new MessageTemplateTextFormatter("[{Level}] {Message}{NewLine}{Exception}")
+            Subject = new MessageTemplateTextFormatter("[{Level}] A message")
         };
 
         var transport = new TestEmailTransport();
@@ -101,8 +101,7 @@ public class EmailSinkTests
                 new MessageTemplate("Subject",
                     new MessageTemplateToken[]
                     {
-                        new PropertyToken("Message", "A multiline" + Environment.NewLine
-                                                                   + "Message")
+                        new PropertyToken("Message", "A multiline" + Environment.NewLine + "Message")
                     })
                 , Enumerable.Empty<LogEventProperty>())
         });
@@ -115,16 +114,11 @@ public class EmailSinkTests
                                            + "System.ArgumentOutOfRangeException: Message of the exception"
                                            + " (Parameter 'parameter1')"
                                            + Environment.NewLine + "", actual.Body);
-        Assert.Equal("[Error] A multiline" + Environment.NewLine
-                                            + "Message" + Environment.NewLine
-                                            + "System.ArgumentOutOfRangeException: Message of the exception"
-                                            + " (Parameter 'parameter1')"
-                                            + Environment.NewLine + "", actual.Subject);
+        Assert.Equal("[Error] A message", actual.Subject);
         Assert.Equal("from@localhost.local", actual.From);
         Assert.Equal(new[] { "to@localhost.local" }, actual.To);
         Assert.False(actual.IsBodyHtml);
     }
-
 
     [Fact]
     public void MultilineMessageCreatesSubjectWithTheFirstLineOnly()

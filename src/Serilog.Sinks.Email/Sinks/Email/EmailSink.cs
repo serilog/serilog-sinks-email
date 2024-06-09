@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 using Serilog.Events;
 using System.Linq;
 using Serilog.Core;
+using Serilog.Formatting;
 
 namespace Serilog.Sinks.Email;
 

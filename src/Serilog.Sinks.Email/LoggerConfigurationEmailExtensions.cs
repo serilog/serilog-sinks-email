@@ -107,7 +107,7 @@ public static class LoggerConfigurationEmailExtensions
     /// </summary>
     /// <param name="loggerConfiguration">The logger configuration.</param>
     /// <param name="options">The connection info used for</param>
-    /// <param name="batchingOptions">Optionally, a <see cref="PeriodicBatchingSinkOptions"/> to control background batching.</param>
+    /// <param name="batchingOptions">Optionally, a <see cref="BatchingOptions"/> to control background batching.</param>
     /// <param name="restrictedToMinimumLevel">The minimum level for
     /// events passed through the sink. Ignored when <paramref name="levelSwitch"/> is specified.</param>
     /// <param name="levelSwitch">A switch allowing the pass-through minimum level

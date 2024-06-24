@@ -69,7 +69,7 @@ public sealed class EmailSinkOptions
 
     /// <summary>
     /// The <see cref="ITextFormatter"/> or <see cref="IBatchTextFormatter"/> implementation
-    /// to write log entries to email. Specify <c>null</c> to use the default body. . Consider using
+    /// to write log entries to email. Specify <c>null</c> to use the default body. Consider using
     /// <see cref="MessageTemplateTextFormatter"/> or <c>Serilog.Expressions</c> templates.
     /// </summary>
     public ITextFormatter Subject { get; set; } = new MessageTemplateTextFormatter(DefaultSubject);

@@ -47,7 +47,7 @@ await using var log = new LoggerConfiguration()
         batchingOptions: new()
         {
             BatchSizeLimit = 10,
-            Period = TimeSpan.FromSeconds(30),
+            BufferingTimeLimit = TimeSpan.FromSeconds(30),
         })
     .CreateLogger();
 ```
@@ -73,7 +73,7 @@ await using var log = new LoggerConfiguration()
         batchingOptions: new()
         {
             BatchSizeLimit = 10,
-            Period = TimeSpan.FromSeconds(30),
+            BufferingTimeLimit = TimeSpan.FromSeconds(30),
         })
     .CreateLogger();
 ```

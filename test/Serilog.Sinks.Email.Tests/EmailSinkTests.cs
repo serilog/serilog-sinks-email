@@ -133,8 +133,8 @@ public class EmailSinkTests
             "from@localhost.local",
             "to@localhost.local",
             "localhost",
-            subject: "[{Level}] {Message}{NewLine}{Exception}",
-            body: "[{Level}] {Message}{NewLine}{Exception}");
+            subject: new MessageTemplateTextFormatter("[{Level}] {Message}{NewLine}{Exception}"),
+            body: new MessageTemplateTextFormatter("[{Level}] {Message}{NewLine}{Exception}"));
 
         var transport = new TestEmailTransport();
 

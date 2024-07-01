@@ -11,13 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Net;
 using MailKit.Security;
 using Serilog.Formatting;
 using Serilog.Formatting.Display;
+using System;
+using System.Collections.Generic;
+using System.Net;
 
 // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
 // ReSharper disable PropertyCanBeMadeInitOnly.Global
@@ -54,9 +53,12 @@ public sealed class EmailSinkOptions
     /// is supplied by MailKit; see <see cref="SecureSocketOptions"/> for supported values. The default is
     /// <see cref="SecureSocketOptions.Auto"/>.</param>
     /// <param name="credentials">The network credentials to use to authenticate with mailServer</param>
-    /// <param name="subject">The subject, can be a plain string or a template such as {Timestamp} [{Level}] occurred.</param>
-    /// <param name="body">A message template describing the format used to write to the sink.
-    /// the default is "{Timestamp} [{Level}] {Message}{NewLine}{Exception}".</param>
+    /// <param name="subject">The <see cref="ITextFormatter"/> implementation to format email subjects. Specify
+    /// <c>null</c> to use the default subject. Consider using <see cref="MessageTemplateTextFormatter"/> or
+    /// <c>Serilog.Expressions</c> templates.</param>
+    /// <param name="body">The <see cref="ITextFormatter"/> or <see cref="IBatchTextFormatter"/> implementation
+    /// to write log entries to email. Specify <c>null</c> to use the default body. Consider using
+    /// <see cref="MessageTemplateTextFormatter"/> or <c>Serilog.Expressions</c> templates.</param>
     /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
     public EmailSinkOptions(
         string from,
@@ -65,8 +67,8 @@ public sealed class EmailSinkOptions
         int port = DefaultPort,
         SecureSocketOptions connectionSecurity = DefaultConnectionSecurity,
         ICredentialsByHost? credentials = null,
-        string? subject = null,
-        string? body = null)
+        ITextFormatter? subject = null,
+        ITextFormatter? body = null)
     {
         if (from == null) throw new ArgumentNullException(nameof(from));
         if (to == null) throw new ArgumentNullException(nameof(to));
@@ -81,12 +83,12 @@ public sealed class EmailSinkOptions
 
         if (subject != null)
         {
-            Subject = new MessageTemplateTextFormatter(subject);
+            Subject = subject;
         }
 
         if (body != null)
         {
-            Body = new MessageTemplateTextFormatter(body);
+            Body = body;
         }
     }
 
@@ -116,16 +118,16 @@ public sealed class EmailSinkOptions
     public ICredentialsByHost? Credentials { get; set; }
 
     /// <summary>
-    /// The <see cref="ITextFormatter"/> or <see cref="IBatchTextFormatter"/> implementation
-    /// to write log entries to email. Specify <c>null</c> to use the default body. . Consider using
-    /// <see cref="MessageTemplateTextFormatter"/> or <c>Serilog.Expressions</c> templates.
+    /// The <see cref="ITextFormatter"/> implementation to format email subjects. Specify
+    /// <c>null</c> to use the default subject. Consider using <see cref="MessageTemplateTextFormatter"/> or
+    /// <c>Serilog.Expressions</c> templates.
     /// </summary>
     public ITextFormatter Subject { get; set; } = new MessageTemplateTextFormatter(DefaultSubject);
 
     /// <summary>
-    /// The <see cref="ITextFormatter"/> implementation to format email subjects. Specify
-    /// <c>null</c> to use the default subject. Consider using <see cref="MessageTemplateTextFormatter"/> or
-    /// <c>Serilog.Expressions</c> templates.
+    /// The <see cref="ITextFormatter"/> or <see cref="IBatchTextFormatter"/> implementation
+    /// to write log entries to email. Specify <c>null</c> to use the default body. Consider using
+    /// <see cref="MessageTemplateTextFormatter"/> or <c>Serilog.Expressions</c> templates.
     /// </summary>
     public ITextFormatter Body { get; set; } = new MessageTemplateTextFormatter(DefaultBody);
 

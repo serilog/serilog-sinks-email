@@ -1,15 +1,15 @@
 version: '{build}'
 skip_tags: true
 image: Visual Studio 2022
-test: off
 build_script:
   - pwsh: ./Build.ps1
+test: off
 artifacts:
   - path: artifacts/Serilog.*.nupkg
 deploy:
   - provider: NuGet
     api_key:
-      secure: sDnchSg4TZIOK7oIUI6BJwFPNENTOZrGNsroGO1hehLJSvlHpFmpTwiX8+bgPD+Q
+      secure: ZpUO4ECx4c/V0Ecj04cfV1UGd+ZABeEG9DDW2fjG8vITjNYhmbiiJH0qNOnRy2G3
     skip_symbols: true
     on:
       branch: /^(main|dev)$/
@@ -20,4 +20,3 @@ deploy:
     tag: v$(appveyor_build_version)
     on:
       branch: main
-

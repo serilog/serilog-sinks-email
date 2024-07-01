@@ -6,8 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Serilog.Configuration;
 using Serilog.Sinks.Email.Tests.Support;
-using Serilog.Sinks.PeriodicBatching;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -84,7 +84,7 @@ public class EmailSinkTests
             To = ["to@localhost.local"],
             From = "from@localhost.local",
             Body = new MessageTemplateTextFormatter("[{Level}] {Message}{NewLine}{Exception}"),
-            Subject = new MessageTemplateTextFormatter("[{Level}] {Message}{NewLine}{Exception}")
+            Subject = new MessageTemplateTextFormatter("[{Level}] A message")
         };
 
         var transport = new TestEmailTransport();
@@ -101,8 +101,7 @@ public class EmailSinkTests
                 new MessageTemplate("Subject",
                     new MessageTemplateToken[]
                     {
-                        new PropertyToken("Message", "A multiline" + Environment.NewLine
-                                                                   + "Message")
+                        new PropertyToken("Message", "A multiline" + Environment.NewLine + "Message")
                     })
                 , Enumerable.Empty<LogEventProperty>())
         });
@@ -115,11 +114,7 @@ public class EmailSinkTests
                                            + "System.ArgumentOutOfRangeException: Message of the exception"
                                            + " (Parameter 'parameter1')"
                                            + Environment.NewLine + "", actual.Body);
-        Assert.Equal("[Error] A multiline" + Environment.NewLine
-                                            + "Message" + Environment.NewLine
-                                            + "System.ArgumentOutOfRangeException: Message of the exception"
-                                            + " (Parameter 'parameter1')"
-                                            + Environment.NewLine + "", actual.Subject);
+        Assert.Equal("[Error] A message", actual.Subject);
         Assert.Equal("from@localhost.local", actual.From);
         Assert.Equal(new[] { "to@localhost.local" }, actual.To);
         Assert.False(actual.IsBodyHtml);
@@ -164,14 +159,27 @@ public class EmailSinkTests
                                            + "System.ArgumentOutOfRangeException: Message of the exception"
                                            + " (Parameter 'parameter1')"
                                            + Environment.NewLine + "", actual.Body);
-        Assert.Equal("[Error] A multiline" + Environment.NewLine
-                                            + "Message" + Environment.NewLine
-                                            + "System.ArgumentOutOfRangeException: Message of the exception"
-                                            + " (Parameter 'parameter1')"
-                                            + Environment.NewLine + "", actual.Subject);
+        Assert.Equal("[Error] A multiline", actual.Subject);
         Assert.Equal("from@localhost.local", actual.From);
         Assert.Equal(new[] { "to@localhost.local" }, actual.To);
         Assert.False(actual.IsBodyHtml);
+    }
+
+    [Fact]
+    public void MultilineMessageCreatesSubjectWithTheFirstLineOnly()
+    {
+        var subjectLineFormatter = new MessageTemplateTextFormatter("{Message}", null);
+
+        var logEvents = new[]
+        {
+            new LogEvent(DateTimeOffset.Now, LogEventLevel.Error, new Exception("An exception occured"),
+                new MessageTemplate(@"Subject",
+                    new MessageTemplateToken[]{new PropertyToken("Message", "A multiline" + Environment.NewLine + "Message")})
+                , Enumerable.Empty<LogEventProperty>())
+        };
+        var mailSubject = EmailSink.ComputeMailSubject(subjectLineFormatter, logEvents);
+
+        Assert.Equal("A multiline", mailSubject);
     }
 
     [Fact]
@@ -189,7 +197,7 @@ public class EmailSinkTests
         var sink = new EmailSink(emailConnectionInfo, emailTransport);
 
         using (var emailLogger = new LoggerConfiguration()
-                   .WriteTo.Sink(new PeriodicBatchingSink(sink, new PeriodicBatchingSinkOptions()))
+                   .WriteTo.Sink(sink, new BatchingOptions())
                    .CreateLogger())
         {
             emailLogger.Information("Information");

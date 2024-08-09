@@ -10,6 +10,7 @@ using Serilog.Configuration;
 using Serilog.Sinks.Email.Tests.Support;
 using Xunit;
 using Xunit.Abstractions;
+using System.Net;
 
 namespace Serilog.Sinks.Email.Tests;
 
@@ -20,19 +21,25 @@ public class EmailSinkTests
         SelfLog.Enable(outputHelper.WriteLine);
     }
 
-    [Fact(Skip = "Requires a localhost mail server")]
+    [Fact]
     public void Works()
     {
+        // Disable certificate check for internal self-signed certificates
+        ServicePointManager.ServerCertificateValidationCallback =
+            (sender, certificate, chain, sslPolicyErrors) => true;
+
         var selfLogMessages = new List<string>();
         SelfLog.Enable(selfLogMessages.Add);
 
         using (var emailLogger = new LoggerConfiguration()
                    .WriteTo.Email(
-                       from: "from@localhost.local",
-                       to: "to@localhost.local",
-                       host: "localhost",
+                       from: "noreply@amatest.net",
+                       to: "admrouzies@amatest.net",
+                       host: "smtp.amatest.net",
                        body: "[{Level}] {Message}{NewLine}{Exception}",
-                       subject: "subject")
+                       subject: "subject",
+                       port: 587,
+                       useDefaultCredentials: true)
                    .CreateLogger())
         {
             emailLogger.Information("test {test}", "test");

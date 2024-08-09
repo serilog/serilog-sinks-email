@@ -15,7 +15,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Net;
-using MailKit.Security;
 using Serilog.Formatting;
 using Serilog.Formatting.Display;
 
@@ -33,7 +32,6 @@ public sealed class EmailSinkOptions
     internal const int DefaultPort = 25;
     const string DefaultSubject = "Log Messages";
     const string DefaultBody = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level}] {Message}{NewLine}{Exception}";
-    internal const SecureSocketOptions DefaultConnectionSecurity = SecureSocketOptions.Auto;
 
     /// <summary>
     /// Constructs an <see cref="EmailSinkOptions"/> with default options.
@@ -68,6 +66,13 @@ public sealed class EmailSinkOptions
     public ICredentialsByHost? Credentials { get; set; }
 
     /// <summary>
+    /// Gets or sets the credentials used for authentication.
+    /// </summary>
+    public bool UseDefaultCredentials { get; set; }
+
+    public bool EnableSSL { get; set; }
+
+    /// <summary>
     /// The <see cref="ITextFormatter"/> or <see cref="IBatchTextFormatter"/> implementation
     /// to write log entries to email. Specify <c>null</c> to use the default body. Consider using
     /// <see cref="MessageTemplateTextFormatter"/> or <c>Serilog.Expressions</c> templates.
@@ -85,13 +90,6 @@ public sealed class EmailSinkOptions
     /// Sets whether the body contents of the email is HTML. Defaults to false.
     /// </summary>
     public bool IsBodyHtml { get; set; }
-
-    /// <summary>
-    /// Choose the security applied to the SMTP connection. This enumeration type is supplied by MailKit; see
-    /// <see cref="SecureSocketOptions"/> for supported values. The default is
-    /// <see cref="SecureSocketOptions.Auto"/>.
-    /// </summary>
-    public SecureSocketOptions ConnectionSecurity { get; set; } = DefaultConnectionSecurity;
 
     /// <summary>
     /// Provides a method that validates server certificates.

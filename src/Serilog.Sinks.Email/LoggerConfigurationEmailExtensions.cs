@@ -15,7 +15,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using MailKit.Security;
 using Serilog.Configuration;
 using Serilog.Core;
 using Serilog.Events;
@@ -64,13 +63,14 @@ public static class LoggerConfigurationEmailExtensions
         string to,
         string host,
         int port = EmailSinkOptions.DefaultPort,
-        SecureSocketOptions connectionSecurity = EmailSinkOptions.DefaultConnectionSecurity,
         ICredentialsByHost? credentials = null,
         string? subject = null,
         string? body = null,
+        bool enableSSL = false,
         IFormatProvider? formatProvider = null,
         LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-        LoggingLevelSwitch? levelSwitch = null)
+        LoggingLevelSwitch? levelSwitch = null,
+        bool useDefaultCredentials = false)
     {
         if (loggerConfiguration == null) throw new ArgumentNullException(nameof(loggerConfiguration));
         if (from == null) throw new ArgumentNullException(nameof(from));
@@ -83,9 +83,10 @@ public static class LoggerConfigurationEmailExtensions
             To = SplitToAddresses(to),
             Host = host,
             Port = port,
-            ConnectionSecurity = connectionSecurity,
+            EnableSSL = enableSSL,
             Credentials = credentials,
             IsBodyHtml = false, // `MessageTemplateTextFormatter` cannot emit valid HTML; the `EmailSinkOptions` overload must be used for this.
+            UseDefaultCredentials = useDefaultCredentials
         };
 
         if (subject != null)
@@ -134,7 +135,7 @@ public static class LoggerConfigurationEmailExtensions
             QueueLimit = DefaultQueueLimit,
         };
 
-        var transport = new MailKitEmailTransport(options);
+        var transport = new NetSmtpTransport(options);
         var sink = new EmailSink(options, transport);
 
         return loggerConfiguration.Sink(sink, batchingOptions, restrictedToMinimumLevel, levelSwitch);

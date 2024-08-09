@@ -70,6 +70,9 @@ public sealed class EmailSinkOptions
     /// </summary>
     public bool UseDefaultCredentials { get; set; }
 
+    /// <summary>
+    /// Enable SSL.
+    /// </summary>
     public bool EnableSSL { get; set; }
 
     /// <summary>

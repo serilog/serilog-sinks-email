@@ -40,15 +40,15 @@ public static class LoggerConfigurationEmailExtensions
     /// <param name="to">The email address emails will be sent to. Multiple addresses can be separated
     /// with commas or semicolons.</param>
     /// <param name="host">The SMTP email server to use</param>
-    /// <param name="connectionSecurity">Choose the security applied to the SMTP connection. This enumeration type
-    /// is supplied by MailKit; see <see cref="SecureSocketOptions"/> for supported values. The default is
-    /// <see cref="SecureSocketOptions.Auto"/>.</param>
     /// <param name="credentials">The network credentials to use to authenticate with mailServer</param>
     /// <param name="body">A message template describing the format used to write to the sink.
     /// the default is "{Timestamp} [{Level}] {Message}{NewLine}{Exception}".</param>
     /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
     /// <param name="subject">The subject, can be a plain string or a template such as {Timestamp} [{Level}] occurred.</param>
     /// <param name="port">Gets or sets the port used for the SMTP connection. The default is 25.</param>
+    /// <param name="enableSSL">Enables SSL. Default is False.</param>
+    /// <param name="isBodyHtml">Enable Body as HTML. Default is False.</param>
+    /// <param name="useDefaultCredentials">Use the default credentials. Default is False.</param>
     /// <param name="restrictedToMinimumLevel">The minimum level for
     /// events passed through the sink. Ignored when <paramref name="levelSwitch"/> is specified.</param>
     /// <param name="levelSwitch">A switch allowing the pass-through minimum level
@@ -67,6 +67,7 @@ public static class LoggerConfigurationEmailExtensions
         string? subject = null,
         string? body = null,
         bool enableSSL = false,
+        bool isBodyHtml = false,
         IFormatProvider? formatProvider = null,
         LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
         LoggingLevelSwitch? levelSwitch = null,
@@ -85,7 +86,7 @@ public static class LoggerConfigurationEmailExtensions
             Port = port,
             EnableSSL = enableSSL,
             Credentials = credentials,
-            IsBodyHtml = false, // `MessageTemplateTextFormatter` cannot emit valid HTML; the `EmailSinkOptions` overload must be used for this.
+            IsBodyHtml = isBodyHtml,
             UseDefaultCredentials = useDefaultCredentials
         };
 

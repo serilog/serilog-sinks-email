@@ -18,5 +18,5 @@ namespace Serilog.Sinks.Email;
 
 interface IEmailTransport : IDisposable
 {
-    Task SendMailAsync(EmailMessage emailMessage);
+    Task SendMail(EmailMessage emailMessage);
 }

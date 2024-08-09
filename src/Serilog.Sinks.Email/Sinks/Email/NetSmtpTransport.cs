@@ -23,7 +23,7 @@ namespace Serilog.Sinks.Email;
 
 class NetSmtpTransport(EmailSinkOptions options) : IEmailTransport
 {
-    public async Task SendMailAsync(EmailMessage emailMessage)
+    public async Task SendMail(EmailMessage emailMessage)
     {
         using (SmtpClient client = new SmtpClient(options.Host))
         {
@@ -55,25 +55,6 @@ class NetSmtpTransport(EmailSinkOptions options) : IEmailTransport
             // Send the email            
             client.Send(mail);
             Console.WriteLine("Email sent successfully!");
-        }
-    }
-
-    private static void SendCompletedCallback(object sender, AsyncCompletedEventArgs e)
-    {
-        // Get the userState object passed to SendAsync.
-        string token = (string)e.UserState;
-
-        if (e.Cancelled)
-        {
-            Console.WriteLine($"[{token}] Send canceled.");
-        }
-        if (e.Error != null)
-        {
-            Console.WriteLine($"[{token}] Error occurred: {e.Error.ToString()}");
-        }
-        else
-        {
-            Console.WriteLine($"[{token}] Message sent successfully.");
         }
     }
 

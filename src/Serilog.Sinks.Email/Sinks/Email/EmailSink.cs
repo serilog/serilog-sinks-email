@@ -71,7 +71,7 @@ class EmailSink : IBatchedLogEventSink, IDisposable
             body.ToString(),
             _sinkOptions.IsBodyHtml);
 
-        return _emailTransport.SendMailAsync(email);
+        return _emailTransport.SendMail(email);
     }
 
     internal static string ComputeMailSubject(ITextFormatter subjectLineFormatter, IEnumerable<LogEvent> events)

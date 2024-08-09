@@ -36,10 +36,11 @@ public class EmailSinkTests
                        from: "noreply@amatest.net",
                        to: "admrouzies@amatest.net",
                        host: "smtp.amatest.net",
-                       body: "[{Level}] {Message}{NewLine}{Exception}",
+                       body: "[{Level}] {Message}{NewLine}{Exception} <b>bold</b> <img src='' alt='Alt text'/>",
                        subject: "subject",
                        port: 587,
-                       useDefaultCredentials: true)
+                       useDefaultCredentials: true,
+                       isBodyHtml: true)
                    .CreateLogger())
         {
             emailLogger.Information("test {test}", "test");

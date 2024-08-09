@@ -13,7 +13,7 @@ class TestEmailTransport : IEmailTransport
         IsDisposed = true;
     }
 
-    public Task SendMailAsync(EmailMessage emailMessage)
+    public Task SendMail(EmailMessage emailMessage)
     {
         Sent.Add(emailMessage);
         return Task.CompletedTask;

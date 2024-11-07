@@ -68,16 +68,16 @@ public sealed class EmailSinkOptions
     public ICredentialsByHost? Credentials { get; set; }
 
     /// <summary>
-    /// The <see cref="ITextFormatter"/> or <see cref="IBatchTextFormatter"/> implementation
-    /// to write log entries to email. Specify <c>null</c> to use the default body. Consider using
-    /// <see cref="MessageTemplateTextFormatter"/> or <c>Serilog.Expressions</c> templates.
+    /// The <see cref="ITextFormatter"/> implementation to format email subjects. Specify
+    /// <c>null</c> to use the default subject. Consider using <see cref="MessageTemplateTextFormatter"/> or
+    /// <c>Serilog.Expressions</c> templates.
     /// </summary>
     public ITextFormatter Subject { get; set; } = new MessageTemplateTextFormatter(DefaultSubject);
 
     /// <summary>
-    /// The <see cref="ITextFormatter"/> implementation to format email subjects. Specify
-    /// <c>null</c> to use the default subject. Consider using <see cref="MessageTemplateTextFormatter"/> or
-    /// <c>Serilog.Expressions</c> templates.
+    /// The <see cref="ITextFormatter"/> or <see cref="IBatchTextFormatter"/> implementation
+    /// to write log entries to email. Specify <c>null</c> to use the default body. Consider using
+    /// <see cref="MessageTemplateTextFormatter"/> or <c>Serilog.Expressions</c> templates.
     /// </summary>
     public ITextFormatter Body { get; set; } = new MessageTemplateTextFormatter(DefaultBody);
 

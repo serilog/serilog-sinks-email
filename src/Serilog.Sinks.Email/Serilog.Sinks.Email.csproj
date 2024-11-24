@@ -31,7 +31,7 @@
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
     <PackageReference Include="PolySharp" Version="1.14.1" PrivateAssets="All" />
     <PackageReference Include="Serilog" Version="4.0.0" />
-    <PackageReference Include="MailKit" Version="4.6.0" />
+    <PackageReference Include="MailKit" Version="4.8.0" />
   </ItemGroup>
 
 </Project>

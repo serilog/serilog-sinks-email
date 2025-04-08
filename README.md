@@ -1,4 +1,4 @@
-# Serilog.Sinks.Email [![Build status](https://ci.appveyor.com/api/projects/status/sfvp7dw8u6aiodj1/branch/main?svg=true)](https://ci.appveyor.com/project/serilog/serilog-sinks-email/branch/main)
+# Serilog.Sinks.Email&mdash;[![Build status](https://github.com/serilog/serilog-sinks-email/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/serilog/serilog-sinks-email/actions)
 
 Sends log events by SMTP email.
 

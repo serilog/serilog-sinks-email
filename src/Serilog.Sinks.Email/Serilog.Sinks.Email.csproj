@@ -29,9 +29,9 @@
     <None Include="../../serilog-sink-nuget.png" Pack="true" Visible="false" PackagePath="/" />
     <None Include="../../README.md" Pack="true" Visible="false" PackagePath="/" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
-    <PackageReference Include="PolySharp" Version="1.14.1" PrivateAssets="All" />
-    <PackageReference Include="Serilog" Version="4.0.0" />
-    <PackageReference Include="MailKit" Version="4.6.0" />
+    <PackageReference Include="PolySharp" Version="1.15.0" PrivateAssets="All" />
+    <PackageReference Include="Serilog" Version="4.2.0" />
+    <PackageReference Include="MailKit" Version="4.11.0" />
   </ItemGroup>
 
 </Project>

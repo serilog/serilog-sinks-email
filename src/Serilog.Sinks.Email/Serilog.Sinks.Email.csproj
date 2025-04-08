@@ -1,27 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>Send Serilog events as SMTP email using MailKit.</Description>
-    <VersionPrefix>4.0.1</VersionPrefix>
     <Authors>Serilog Contributors</Authors>
     <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT'">net462;net471</TargetFrameworks>
-    <TargetFrameworks>$(TargetFrameworks);netstandard2.0;net6.0;net8.0</TargetFrameworks>
-    <AssemblyOriginatorKeyFile>../../assets/Serilog.snk</AssemblyOriginatorKeyFile>
-    <SignAssembly>true</SignAssembly>
-    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <TargetFrameworks>$(TargetFrameworks);netstandard2.0;net6.0;net8.0;net9.0</TargetFrameworks>
     <PackageTags>serilog;smtp;mailkit</PackageTags>
     <PackageIcon>serilog-sink-nuget.png</PackageIcon>
     <PackageProjectUrl>https://serilog.net/</PackageProjectUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <TreatSpecificWarningsAsErrors />
     <PolySharpIncludeRuntimeSupportedAttributes>true</PolySharpIncludeRuntimeSupportedAttributes>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RootNamespace>Serilog</RootNamespace>
-    <Nullable>enable</Nullable>
     <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
   </PropertyGroup>
 

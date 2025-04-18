@@ -48,6 +48,11 @@ class MailKitEmailTransport(EmailSinkOptions options) : IEmailTransport
             smtpClient.ServerCertificateValidationCallback += options.ServerCertificateValidationCallback;
         }
 
+        if (!string.IsNullOrWhiteSpace(options.LocalDomain))
+        {
+            smtpClient.LocalDomain = options.LocalDomain;
+        }
+
         smtpClient.Connect(options.Host, options.Port, options.ConnectionSecurity);
 
         if (options.Credentials != null)

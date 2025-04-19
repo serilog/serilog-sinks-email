@@ -1,10 +1,10 @@
-# Serilog.Sinks.Email [![Build status](https://ci.appveyor.com/api/projects/status/sfvp7dw8u6aiodj1/branch/main?svg=true)](https://ci.appveyor.com/project/serilog/serilog-sinks-email/branch/main)
+# Serilog.Sinks.Email&nbsp;[![Build status](https://github.com/serilog/serilog-sinks-email/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/serilog/serilog-sinks-email/actions)&nbsp;[![NuGet Version](http://img.shields.io/nuget/v/Serilog.Sinks.Email.svg?style=flat)](https://www.nuget.org/packages/Serilog.Sinks.Email/)
 
 Sends log events by SMTP email.
 
 > ℹ️ Version 3.x of this package changes the name and structure of many configuration parameters from their 2.x names; see below for detailed information.
 
-**Package** - [Serilog.Sinks.Email](http://nuget.org/packages/serilog.sinks.email)
+**Package Id:** [Serilog.Sinks.Email](http://nuget.org/packages/serilog.sinks.email)
 
 ```csharp
 await using var log = new LoggerConfiguration()
@@ -47,7 +47,7 @@ await using var log = new LoggerConfiguration()
         batchingOptions: new()
         {
             BatchSizeLimit = 10,
-            Period = TimeSpan.FromSeconds(30),
+            BufferingTimeLimit = TimeSpan.FromSeconds(30),
         })
     .CreateLogger();
 ```
@@ -73,7 +73,7 @@ await using var log = new LoggerConfiguration()
         batchingOptions: new()
         {
             BatchSizeLimit = 10,
-            Period = TimeSpan.FromSeconds(30),
+            BufferingTimeLimit = TimeSpan.FromSeconds(30),
         })
     .CreateLogger();
 ```

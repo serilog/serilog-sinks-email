@@ -1,4 +1,4 @@
-# Serilog.Sinks.Email&mdash;[![Build status](https://github.com/serilog/serilog-sinks-email/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/serilog/serilog-sinks-email/actions)
+# Serilog.Sinks.Email&nbsp;[![Build status](https://github.com/serilog/serilog-sinks-email/actions/workflows/ci.yml/badge.svg?branch=dev)](https://github.com/serilog/serilog-sinks-email/actions)
 
 Sends log events by SMTP email.
 

@@ -152,9 +152,11 @@ public class EmailSinkTests
         var sink = new EmailSink(emailConnectionInfo, emailTransport);
 
         using (var emailLogger = new LoggerConfiguration()
-                   .WriteTo.Sink(sink, new BatchingOptions())
+                   .WriteTo.Sink(sink, new BatchingOptions() { EagerlyEmitFirstEvent = false })
                    .CreateLogger())
         {
+            // The EagerlyEmitFirstEvent may occur fast enough that we get multiple sends (linux, especially),
+            // set it false
             emailLogger.Information("Information");
             emailLogger.Warning("Warning");
             emailLogger.Error("<Error>");

@@ -54,6 +54,7 @@ public static class LoggerConfigurationEmailExtensions
     /// events passed through the sink. Ignored when <paramref name="levelSwitch"/> is specified.</param>
     /// <param name="levelSwitch">A switch allowing the pass-through minimum level
     /// to be changed at runtime.</param>
+    /// <param name="localDomain">A string specifying the LocalDomain value for MailKit to use, if provided</param>
     /// <returns>
     /// Logger configuration, allowing configuration to continue.
     /// </returns>
@@ -70,7 +71,8 @@ public static class LoggerConfigurationEmailExtensions
         string? body = null,
         IFormatProvider? formatProvider = null,
         LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-        LoggingLevelSwitch? levelSwitch = null)
+        LoggingLevelSwitch? levelSwitch = null,
+        string? localDomain = null)
     {
         if (loggerConfiguration == null) throw new ArgumentNullException(nameof(loggerConfiguration));
         if (from == null) throw new ArgumentNullException(nameof(from));
@@ -86,6 +88,7 @@ public static class LoggerConfigurationEmailExtensions
             ConnectionSecurity = connectionSecurity,
             Credentials = credentials,
             IsBodyHtml = false, // `MessageTemplateTextFormatter` cannot emit valid HTML; the `EmailSinkOptions` overload must be used for this.
+            LocalDomain = localDomain,
         };
 
         if (subject != null)

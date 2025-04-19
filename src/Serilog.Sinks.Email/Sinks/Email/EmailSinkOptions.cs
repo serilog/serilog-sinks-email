@@ -97,4 +97,10 @@ public sealed class EmailSinkOptions
     /// Provides a method that validates server certificates.
     /// </summary>
     public System.Net.Security.RemoteCertificateValidationCallback? ServerCertificateValidationCallback { get; set; }
+
+    /// <summary>
+    /// Provides a LocalDomain setting for MailKit in case a custom HELO needs to be used
+    /// </summary>
+    /// <value></value>
+    public string? LocalDomain {get; set;} = null;
 }

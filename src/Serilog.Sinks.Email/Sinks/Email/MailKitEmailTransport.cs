@@ -32,12 +32,12 @@ class MailKitEmailTransport(EmailSinkOptions options) : IEmailTransport
             ? new BodyBuilder { HtmlBody = emailMessage.Body }.ToMessageBody()
             : new BodyBuilder { TextBody = emailMessage.Body }.ToMessageBody();
 
-        using var smtpClient = OpenConnectedSmtpClient();
+        using var smtpClient = await OpenConnectedSmtpClientAsync();
         await smtpClient.SendAsync(mimeMessage);
         await smtpClient.DisconnectAsync(quit: true);
     }
 
-    SmtpClient OpenConnectedSmtpClient()
+    async Task<SmtpClient> OpenConnectedSmtpClientAsync()
     {
         var smtpClient = new SmtpClient();
 
@@ -48,15 +48,20 @@ class MailKitEmailTransport(EmailSinkOptions options) : IEmailTransport
             smtpClient.ServerCertificateValidationCallback += options.ServerCertificateValidationCallback;
         }
 
-        smtpClient.Connect(options.Host, options.Port, options.ConnectionSecurity);
+        await smtpClient.ConnectAsync(options.Host, options.Port, options.ConnectionSecurity);
 
-        if (options.Credentials != null)
+        if (options.SaslMechanism != null)
         {
-            smtpClient.Authenticate(
+            await smtpClient.AuthenticateAsync(options.SaslMechanism);
+        }
+        else if (options.Credentials != null)
+        {
+            await smtpClient.AuthenticateAsync(
                 Encoding.UTF8,
                 options.Credentials.GetCredential(
                     options.Host, options.Port, "smtp"));
         }
+
         return smtpClient;
     }
 

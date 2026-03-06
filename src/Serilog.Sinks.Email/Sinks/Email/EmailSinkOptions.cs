@@ -11,9 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Net;
 using MailKit.Security;
 using Serilog.Formatting;
@@ -63,7 +60,7 @@ public sealed class EmailSinkOptions
     public int Port { get; set; } = DefaultPort;
 
     /// <summary>
-    /// Gets or sets the credentials used for authentication.
+    /// Gets or sets the credentials used for authentication. See also <see cref="SaslMechanism"/> for OAuth2 credentials.
     /// </summary>
     public ICredentialsByHost? Credentials { get; set; }
 
@@ -97,4 +94,11 @@ public sealed class EmailSinkOptions
     /// Provides a method that validates server certificates.
     /// </summary>
     public System.Net.Security.RemoteCertificateValidationCallback? ServerCertificateValidationCallback { get; set; }
+
+    /// <summary>
+    /// A <see cref="MailKit.Security.SaslMechanism"/> for performing OAuth2 authentication against services such as
+    /// Microsoft 365. See <a href="https://github.com/jstedfast/MailKit/blob/master/ExchangeOAuth2.md#authenticating-a-web-service-with-oauth2">these instructions</a>
+    /// for how to create this object.
+    /// </summary>
+    public SaslMechanism? SaslMechanism { get; set; }
 }

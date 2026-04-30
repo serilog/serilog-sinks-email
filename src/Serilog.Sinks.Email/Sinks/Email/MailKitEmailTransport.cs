@@ -12,6 +12,7 @@
 // limitations under the License.
 
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using MailKit.Net.Smtp;
@@ -54,12 +55,9 @@ class MailKitEmailTransport(EmailSinkOptions options) : IEmailTransport
         {
             await smtpClient.AuthenticateAsync(options.SaslMechanism);
         }
-        else if (options.Credentials != null)
+        else if (options.Credentials?.GetCredential(options.Host, options.Port, "smtp") is NetworkCredential credentials)
         {
-            await smtpClient.AuthenticateAsync(
-                Encoding.UTF8,
-                options.Credentials.GetCredential(
-                    options.Host, options.Port, "smtp"));
+            await smtpClient.AuthenticateAsync(Encoding.UTF8, credentials);
         }
 
         return smtpClient;
